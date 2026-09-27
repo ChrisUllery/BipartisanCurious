@@ -253,9 +253,33 @@ def build_stats(row):
             ),
 
             # Relationship between major parties
+            #
+            # party_unity_vote is the explicit analytical name for
+            # a standard Yea/Nay roll call where the Republican and
+            # Democratic voting majorities take opposite positions.
+            #
+            # parties_opposed is retained for backward compatibility.
+            "party_unity_vote": parties_opposed,
             "parties_opposed": parties_opposed,
             "parties_same_side": parties_same_side,
 
+            # Absolute difference between Republican and Democratic
+            # Yea shares among members casting Yea/Nay votes.
+            #
+            # 0.00 = identical party voting distributions
+            # 1.00 = complete party separation
+            "party_separation": (
+                abs(
+                    safe_share(r_yea, r_yea_nay)
+                    - safe_share(d_yea, d_yea_nay)
+                )
+                if r_yea_nay > 0
+                and d_yea_nay > 0
+                else None
+            ),
+
+            # Retained for backward compatibility. This is
+            # mathematically identical to party_separation.
             "major_party_yea_share_difference": (
                 abs(
                     safe_share(r_yea, r_yea_nay)
@@ -263,6 +287,19 @@ def build_stats(row):
                 )
                 if r_yea_nay > 0
                 and d_yea_nay > 0
+                else None
+            ),
+
+            # Overall House Yea/Nay margin on a 0-1 scale.
+            #
+            # 0.00 = evenly divided Yea/Nay vote
+            # 1.00 = unanimous Yea or unanimous Nay
+            "house_margin_share": (
+                abs(
+                    safe_share(total_yea, total_yea_nay)
+                    - 0.5
+                ) * 2
+                if total_yea_nay > 0
                 else None
             ),
         }

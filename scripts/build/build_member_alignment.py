@@ -176,9 +176,13 @@ def main():
         "republican_majority_strength",
         "democratic_majority_strength",
 
+        # Party-unity and vote-context measures
+        "party_unity_vote",
         "parties_opposed",
         "parties_same_side",
+        "party_separation",
         "major_party_yea_share_difference",
+        "house_margin_share",
     ]
 
     roll_subset = roll_stats[roll_columns].copy()
