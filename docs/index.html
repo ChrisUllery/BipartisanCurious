@@ -81,6 +81,44 @@
             color: #666;
         }
 
+        .period-control {
+            margin: 0 0 24px;
+        }
+
+        .period-control label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            color: #666;
+        }
+
+        .period-control select {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            background: white;
+            font: inherit;
+            color: #222;
+        }
+
+        .period-dates {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        .no-period-data {
+            margin: 18px 0;
+            padding: 14px;
+            background: #f2f2f2;
+            line-height: 1.45;
+            color: #444;
+        }
+
         .methodology {
             margin-top: 28px;
             padding-top: 20px;
@@ -220,32 +258,100 @@
     }
 
 
-    function showDistrict(properties) {
-        const panel = document.getElementById("panel");
+    let historyData = null;
+    let selectedPeriodKey = "congress:119";
+    let selectedDistrictProperties = null;
 
-        if (!properties.bioguide_id) {
-            panel.innerHTML = `
-                <h1>${districtLabel(properties)}</h1>
 
-                <div class="vacant">
-                    This congressional seat is currently vacant.
-                </div>
-            `;
-
-            return;
+    function formatDate(dateString) {
+        if (!dateString) {
+            return "";
         }
 
-        panel.innerHTML = `
-            <h2 class="member-name">
-                ${properties.official_name}
-            </h2>
+        const parts = dateString.split("-");
 
-            <p class="member-meta">
-                ${partyName(properties.party)}
-                ·
-                ${districtLabel(properties)}
-            </p>
+        if (parts.length !== 3) {
+            return dateString;
+        }
 
+        const date = new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+        );
+
+        return date.toLocaleDateString(
+            "en-US",
+            {
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
+    }
+
+
+    function periodOptions() {
+        if (!historyData) {
+            return "";
+        }
+
+        let html = "";
+        let currentGroup = null;
+
+        for (const key of historyData.period_order) {
+            const period = historyData.periods[key];
+
+            if (period.group !== currentGroup) {
+                if (currentGroup !== null) {
+                    html += "</optgroup>";
+                }
+
+                currentGroup = period.group;
+
+                html += `
+                    <optgroup label="${period.group}">
+                `;
+            }
+
+            const selected =
+                key === selectedPeriodKey
+                    ? " selected"
+                    : "";
+
+            html += `
+                <option value="${key}"${selected}>
+                    ${period.label}
+                </option>
+            `;
+        }
+
+        if (currentGroup !== null) {
+            html += "</optgroup>";
+        }
+
+        return html;
+    }
+
+
+    function periodDateText(period) {
+        if (!period) {
+            return "";
+        }
+
+        const start = formatDate(period.start_date);
+        const end = formatDate(period.end_date);
+
+        if (!start || !end) {
+            return "";
+        }
+
+        return `${start} – ${end}`;
+    }
+
+
+    function renderStats(record) {
+        return `
             <div class="section-label">
                 WHEN THE PARTIES DISAGREED
             </div>
@@ -261,13 +367,13 @@
                 </div>
 
                 <div class="stat-value">
-                    ${percent(properties.party_unity_rate)}
+                    ${percent(record.unity_rate)}
                 </div>
 
                 <div class="stat-detail">
-                    ${number(properties.with_own_party_unity)}
+                    ${number(record.with_party)}
                     of
-                    ${number(properties.party_unity_votes_cast)}
+                    ${number(record.votes_cast)}
                     votes cast
                 </div>
             </div>
@@ -278,13 +384,13 @@
                 </div>
 
                 <div class="stat-value">
-                    ${percent(properties.party_opposition_rate)}
+                    ${percent(record.opposition_rate)}
                 </div>
 
                 <div class="stat-detail">
-                    ${number(properties.against_own_party_unity)}
+                    ${number(record.against_party)}
                     of
-                    ${number(properties.party_unity_votes_cast)}
+                    ${number(record.votes_cast)}
                     votes cast
                 </div>
             </div>
@@ -295,12 +401,12 @@
                 </div>
 
                 <div class="stat-value">
-                    ${number(properties.party_unity_not_voting)}
+                    ${number(record.not_voting)}
                 </div>
 
                 <div class="stat-detail">
                     of
-                    ${number(properties.party_unity_opportunities)}
+                    ${number(record.opportunities)}
                     qualifying roll calls
                 </div>
             </div>
@@ -311,19 +417,22 @@
                 </div>
 
                 <div class="stat-value">
-                    ${percent(
-                        properties.party_unity_participation_rate
-                    )}
+                    ${percent(record.participation_rate)}
                 </div>
 
                 <div class="stat-detail">
-                    ${number(properties.party_unity_votes_cast)}
+                    ${number(record.votes_cast)}
                     of
-                    ${number(properties.party_unity_opportunities)}
+                    ${number(record.opportunities)}
                     qualifying roll calls
                 </div>
             </div>
+        `;
+    }
 
+
+    function methodologyHtml() {
+        return `
             <div class="methodology">
                 <h3>About these numbers</h3>
 
@@ -339,8 +448,8 @@
                     <strong>With or against party</strong><br>
                     A representative is counted as voting with their
                     party when their Yea or Nay vote matches the
-                    majority position of their party, and against
-                    their party when it does not.
+                    majority position of their party at the time of
+                    the vote, and against their party when it does not.
                 </p>
 
                 <p>
@@ -353,14 +462,145 @@
                 </p>
 
                 <p>
-                    <strong>Scope</strong><br>
-                    These figures currently cover the 119th Congress.
-                    Roll calls involving territorial delegates or the
-                    resident commissioner are excluded from this
-                    analysis.
+                    <strong>Historical periods</strong><br>
+                    Congress periods use all available roll calls from
+                    that Congress. Presidential periods are divided
+                    using the date of each roll call. Trump I begins
+                    Jan. 20, 2017; Biden begins Jan. 20, 2021; and
+                    Trump II begins Jan. 20, 2025.
+                </p>
+
+                <p>
+                    <strong>Current map, historical voting records</strong><br>
+                    The map shows districts and representatives from
+                    the 119th Congress. Historical selections show the
+                    voting record of that current representative when
+                    they served during the selected period. A current
+                    representative who did not serve in a selected
+                    period will have no record for that period.
+                </p>
+
+                <p>
+                    <strong>Territorial members</strong><br>
+                    Territorial delegates and the resident commissioner
+                    may appear in the underlying Clerk roll-call data.
+                    Their votes do not alter whether a roll call
+                    qualifies unless they change a major party's
+                    Yea/Nay majority position.
                 </p>
             </div>
         `;
+    }
+
+
+    function showDistrict(properties) {
+        const panel = document.getElementById("panel");
+
+        selectedDistrictProperties = properties;
+
+        if (!properties.bioguide_id) {
+            panel.innerHTML = `
+                <h1>${districtLabel(properties)}</h1>
+
+                <div class="vacant">
+                    This congressional seat is currently vacant.
+                </div>
+            `;
+
+            return;
+        }
+
+        if (!historyData) {
+            panel.innerHTML = `
+                <h2 class="member-name">
+                    ${properties.official_name}
+                </h2>
+
+                <p class="member-meta">
+                    ${partyName(properties.party)}
+                    •
+                    ${districtLabel(properties)}
+                </p>
+
+                <div class="no-period-data">
+                    Historical voting data is still loading.
+                </div>
+            `;
+
+            return;
+        }
+
+        const period =
+            historyData.periods[selectedPeriodKey];
+
+        const record =
+            period.members[properties.bioguide_id];
+
+        const displayedName =
+            record && record.name
+                ? record.name
+                : properties.official_name;
+
+        const displayedParty =
+            record && record.party_code
+                ? partyName(record.party_code)
+                : partyName(properties.party);
+
+        let recordHtml;
+
+        if (record) {
+            recordHtml = renderStats(record);
+        } else {
+            recordHtml = `
+                <div class="no-period-data">
+                    No voting record is available for
+                    ${properties.official_name}
+                    during the ${period.label}.
+                </div>
+            `;
+        }
+
+        panel.innerHTML = `
+            <h2 class="member-name">
+                ${displayedName}
+            </h2>
+
+            <p class="member-meta">
+                ${displayedParty}
+                •
+                ${districtLabel(properties)}
+            </p>
+
+            <div class="period-control">
+                <label for="period-select">
+                    PERIOD
+                </label>
+
+                <select id="period-select">
+                    ${periodOptions()}
+                </select>
+
+                <div class="period-dates">
+                    ${periodDateText(period)}
+                </div>
+            </div>
+
+            ${recordHtml}
+
+            ${methodologyHtml()}
+        `;
+
+        document
+            .getElementById("period-select")
+            .addEventListener(
+                "change",
+                event => {
+                    selectedPeriodKey = event.target.value;
+                    showDistrict(
+                        selectedDistrictProperties
+                    );
+                }
+            );
     }
 
 
@@ -375,56 +615,96 @@
     }
 
 
-    fetch("data/districts_119.geojson")
-        .then(response => {
-            if (!response.ok) {
+    Promise.all([
+        fetch("data/districts_119.geojson").then(
+            response => {
+                if (!response.ok) {
+                    throw new Error(
+                        `GeoJSON request failed: ${response.status}`
+                    );
+                }
+
+                return response.json();
+            }
+        ),
+
+        fetch("data/member_history.json").then(
+            response => {
+                if (!response.ok) {
+                    throw new Error(
+                        `History request failed: ${response.status}`
+                    );
+                }
+
+                return response.json();
+            }
+        )
+    ])
+        .then(([districtData, history]) => {
+            historyData = history;
+
+            if (
+                !historyData.periods ||
+                !historyData.periods[selectedPeriodKey]
+            ) {
                 throw new Error(
-                    `GeoJSON request failed: ${response.status}`
+                    "Default historical period is missing."
                 );
             }
 
-            return response.json();
-        })
-        .then(data => {
-            const districts = L.geoJSON(data, {
-                style: districtStyle,
+            const districts = L.geoJSON(
+                districtData,
+                {
+                    style: districtStyle,
 
-                onEachFeature: (feature, layer) => {
-                    const properties = feature.properties;
+                    onEachFeature: (feature, layer) => {
+                        const properties =
+                            feature.properties;
 
-                    layer.bindTooltip(
-                        `${districtLabel(properties)} — ` +
-                        (
-                            properties.official_name ||
-                            "Vacant"
-                        ),
-                        {
-                            sticky: true
-                        }
-                    );
+                        layer.bindTooltip(
+                            `${districtLabel(properties)} • ` +
+                            (
+                                properties.official_name ||
+                                "Vacant"
+                            ) +
+                            (
+                                properties.party
+                                    ? ` (${properties.party})`
+                                    : ""
+                            ),
+                            {
+                                sticky: true
+                            }
+                        );
 
-                    layer.on("click", () => {
-                        showDistrict(properties);
+                        layer.on("click", () => {
+                            showDistrict(properties);
 
-                        layer.setStyle({
-                            weight: 3
+                            layer.setStyle({
+                                weight: 3
+                            });
                         });
-                    });
+                    }
                 }
-            }).addTo(map);
+            ).addTo(map);
 
-            map.fitBounds(districts.getBounds(), {
-                padding: [10, 10]
-            });
+            map.fitBounds(
+                districts.getBounds(),
+                {
+                    padding: [10, 10]
+                }
+            );
         })
         .catch(error => {
             console.error(error);
 
-            document.getElementById("panel").innerHTML = `
+            document.getElementById(
+                "panel"
+            ).innerHTML = `
                 <h1>BipartisanCurious</h1>
 
                 <p>
-                    The congressional district data could not be loaded.
+                    The dashboard data could not be loaded.
                 </p>
 
                 <pre>${error.message}</pre>
