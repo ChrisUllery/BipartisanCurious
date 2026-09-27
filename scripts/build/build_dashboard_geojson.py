@@ -6,7 +6,9 @@ import pandas as pd
 
 CONGRESS = 119
 
-GEOJSON_FILE = Path("data/raw/cd119_500k.geojson")
+GEOJSON_FILE = Path(
+    "data/raw/census/cd119_500k.geojson"
+)
 
 MEMBERS_FILE = (
     Path("data/processed/dashboard")
@@ -54,6 +56,59 @@ def clean_value(value):
 def main():
     with GEOJSON_FILE.open(encoding="utf-8") as f:
         source = json.load(f)
+
+    # --------------------------------------------------------
+    # Validate source geography before doing any joins.
+    # --------------------------------------------------------
+
+    source_features = source.get("features", [])
+
+    if len(source_features) != 441:
+        raise RuntimeError(
+            "Expected 441 Census congressional-district "
+            f"features, found {len(source_features)}."
+        )
+
+    missing_geometry = []
+    invalid_geometry = []
+
+    for feature in source_features:
+        props = feature.get("properties", {})
+        geoid = str(props.get("GEOID", "UNKNOWN"))
+
+        geometry = feature.get("geometry")
+
+        if (
+            not geometry
+            or not geometry.get("coordinates")
+        ):
+            missing_geometry.append(geoid)
+            continue
+
+        if geometry.get("type") not in {
+            "Polygon",
+            "MultiPolygon",
+        }:
+            invalid_geometry.append(
+                (
+                    geoid,
+                    geometry.get("type"),
+                )
+            )
+
+    if missing_geometry:
+        raise RuntimeError(
+            "Census source contains "
+            f"{len(missing_geometry)} features with "
+            "missing/empty geometry. Examples: "
+            + ", ".join(missing_geometry[:10])
+        )
+
+    if invalid_geometry:
+        raise RuntimeError(
+            "Census source contains unexpected geometry "
+            f"types. Examples: {invalid_geometry[:10]}"
+        )
 
     members = pd.read_csv(
         MEMBERS_FILE,

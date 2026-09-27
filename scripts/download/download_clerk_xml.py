@@ -1,4 +1,5 @@
 from pathlib import Path
+import argparse
 import time
 import xml.etree.ElementTree as ET
 
@@ -12,10 +13,9 @@ from tqdm import tqdm
 
 OUTPUT_ROOT = Path("data/raw/clerk_xml")
 
-# 119th Congress:
-#   1st session = 2025
-#   2nd session = 2026
-YEARS = [2025, 2026]
+# Default to the current 119th Congress when no years are
+# supplied on the command line.
+DEFAULT_YEARS = [2025, 2026]
 
 # Roll calls start at 1 each calendar year/session.
 START_ROLL = 1
@@ -271,15 +271,44 @@ def download_year(session, year):
 
 
 # ============================================================
+# COMMAND LINE
+# ============================================================
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Download U.S. House Clerk roll-call XML files "
+            "for one or more calendar years."
+        )
+    )
+
+    parser.add_argument(
+        "years",
+        nargs="*",
+        type=int,
+        help=(
+            "Calendar years to download. "
+            "Example: 2023 2024. "
+            "Defaults to 2025 2026."
+        ),
+    )
+
+    return parser.parse_args()
+
+
+# ============================================================
 # MAIN
 # ============================================================
 
 def main():
+    args = parse_args()
+
+    years = args.years or DEFAULT_YEARS
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
     print("BipartisanCurious Clerk XML downloader")
     print("--------------------------------------")
-    print(f"Years: {YEARS}")
+    print(f"Years: {years}")
     print(
         f"Stop rule: {CONSECUTIVE_MISSING_LIMIT} "
         "consecutive missing/invalid rolls"
@@ -295,7 +324,7 @@ def main():
             }
         )
 
-        for year in YEARS:
+        for year in years:
             download_year(session, year)
 
     print("\nDownload run complete.")

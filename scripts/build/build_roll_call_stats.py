@@ -1,24 +1,10 @@
 from pathlib import Path
+import argparse
 
 import pandas as pd
 
 
-CONGRESS = 119
-
-ROLL_CALL_FILE = (
-    Path("data/processed/roll_calls")
-    / f"roll_calls_{CONGRESS}.csv"
-)
-
-MEMBER_VOTES_FILE = (
-    Path("data/processed/members")
-    / f"member_votes_{CONGRESS}.csv"
-)
-
-OUTPUT_FILE = (
-    Path("data/processed/roll_calls")
-    / f"roll_call_stats_{CONGRESS}.csv"
-)
+DEFAULT_CONGRESS = 119
 
 
 def safe_share(numerator, denominator):
@@ -311,9 +297,44 @@ def build_stats(row):
     )
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Build House roll-call statistics for one Congress."
+        )
+    )
+
+    parser.add_argument(
+        "--congress",
+        type=int,
+        default=DEFAULT_CONGRESS,
+        help="Congress number to build. Defaults to 119.",
+    )
+
+    return parser.parse_args()
+
+
 def main():
-    df = pd.read_csv(ROLL_CALL_FILE)
-    member_votes = pd.read_csv(MEMBER_VOTES_FILE)
+    args = parse_args()
+    congress = args.congress
+
+    roll_call_file = (
+        Path("data/processed/roll_calls")
+        / f"roll_calls_{congress}.csv"
+    )
+
+    member_votes_file = (
+        Path("data/processed/members")
+        / f"member_votes_{congress}.csv"
+    )
+
+    output_file = (
+        Path("data/processed/roll_calls")
+        / f"roll_call_stats_{congress}.csv"
+    )
+
+    df = pd.read_csv(roll_call_file)
+    member_votes = pd.read_csv(member_votes_file)
 
     # --------------------------------------------------------
     # Identify roll calls containing Clerk state code XX.
@@ -340,6 +361,7 @@ def main():
 
     print("BipartisanCurious full roll-call statistics builder")
     print("---------------------------------------------------")
+    print(f"Congress: {congress}")
     print(f"Roll calls loaded: {len(df):,}")
 
     stats = df.apply(
@@ -479,19 +501,19 @@ def main():
             "member-record counts."
         )
 
-    OUTPUT_FILE.parent.mkdir(
+    output_file.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
     output.to_csv(
-        OUTPUT_FILE,
+        output_file,
         index=False,
     )
 
     print("\nOUTPUT")
     print("------")
-    print(OUTPUT_FILE)
+    print(output_file)
     print(f"Rows written: {len(output):,}")
     print(f"Columns written: {len(output.columns):,}")
 

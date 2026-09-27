@@ -1,24 +1,10 @@
 from pathlib import Path
+import argparse
 
 import pandas as pd
 
 
-CONGRESS = 119
-
-MEMBER_VOTES_FILE = (
-    Path("data/processed/members")
-    / f"member_votes_{CONGRESS}.csv"
-)
-
-ROLL_STATS_FILE = (
-    Path("data/processed/roll_calls")
-    / f"roll_call_stats_{CONGRESS}.csv"
-)
-
-OUTPUT_FILE = (
-    Path("data/processed/members")
-    / f"member_vote_alignment_{CONGRESS}.csv"
-)
+DEFAULT_CONGRESS = 119
 
 
 ROLL_KEY = [
@@ -143,12 +129,48 @@ def get_other_major_party_position(row):
     return None
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Build member vote-alignment records for one Congress."
+        )
+    )
+
+    parser.add_argument(
+        "--congress",
+        type=int,
+        default=DEFAULT_CONGRESS,
+        help="Congress number to build. Defaults to 119.",
+    )
+
+    return parser.parse_args()
+
+
 def main():
-    member_votes = pd.read_csv(MEMBER_VOTES_FILE)
-    roll_stats = pd.read_csv(ROLL_STATS_FILE)
+    args = parse_args()
+    congress = args.congress
+
+    member_votes_file = (
+        Path("data/processed/members")
+        / f"member_votes_{congress}.csv"
+    )
+
+    roll_stats_file = (
+        Path("data/processed/roll_calls")
+        / f"roll_call_stats_{congress}.csv"
+    )
+
+    output_file = (
+        Path("data/processed/members")
+        / f"member_vote_alignment_{congress}.csv"
+    )
+
+    member_votes = pd.read_csv(member_votes_file)
+    roll_stats = pd.read_csv(roll_stats_file)
 
     print("BipartisanCurious member alignment builder")
     print("------------------------------------------")
+    print(f"Congress: {congress}")
     print(f"Member-vote rows loaded: {len(member_votes):,}")
     print(f"Roll-call rows loaded:   {len(roll_stats):,}")
 
@@ -353,19 +375,19 @@ def main():
     # Write
     # --------------------------------------------------------
 
-    OUTPUT_FILE.parent.mkdir(
+    output_file.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
     merged.to_csv(
-        OUTPUT_FILE,
+        output_file,
         index=False,
     )
 
     print("\nOUTPUT")
     print("------")
-    print(OUTPUT_FILE)
+    print(output_file)
     print(f"Rows written: {len(merged):,}")
     print(f"Columns written: {len(merged.columns):,}")
 

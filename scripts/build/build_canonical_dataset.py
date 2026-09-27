@@ -1,4 +1,5 @@
 from pathlib import Path
+import argparse
 import sys
 
 import pandas as pd
@@ -17,26 +18,9 @@ from parse_roll_call import parse_roll_call
 # CONFIG
 # ============================================================
 
-CONGRESS = 119
+DEFAULT_CONGRESS = 119
 
 RAW_ROOT = Path("data/raw/clerk_xml")
-
-ROLL_CALL_OUTPUT = (
-    Path("data/processed/roll_calls")
-    / f"roll_calls_{CONGRESS}.csv"
-)
-
-MEMBER_VOTE_OUTPUT = (
-    Path("data/processed/members")
-    / f"member_votes_{CONGRESS}.csv"
-)
-
-VALIDATION_OUTPUT = (
-    Path("data/diagnostics")
-    / f"xml_validation_{CONGRESS}.csv"
-)
-
-YEARS = [2025, 2026]
 
 EXPECTED_PARTIES = {
     "Republican",
@@ -65,11 +49,11 @@ def atomic_write_csv(df, path):
     temp_path.replace(path)
 
 
-def get_xml_files():
-    """Collect all raw Clerk XML files for the configured years."""
+def get_xml_files(years):
+    """Collect all raw Clerk XML files for the requested Congress."""
     files = []
 
-    for year in YEARS:
+    for year in years:
         year_dir = RAW_ROOT / str(year)
 
         if not year_dir.exists():
@@ -153,11 +137,69 @@ def build_roll_call_row(metadata, member_votes):
 
 
 # ============================================================
+# COMMAND LINE / CONGRESS CONFIG
+# ============================================================
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Build canonical House roll-call and member-vote "
+            "datasets for one Congress."
+        )
+    )
+
+    parser.add_argument(
+        "--congress",
+        type=int,
+        default=DEFAULT_CONGRESS,
+        help=(
+            "Congress number to build. "
+            "Defaults to 119."
+        ),
+    )
+
+    return parser.parse_args()
+
+
+def congress_years(congress):
+    """
+    Return the two calendar years belonging to a Congress.
+
+    Examples:
+      115 -> [2017, 2018]
+      118 -> [2023, 2024]
+      119 -> [2025, 2026]
+    """
+    first_year = 1787 + (2 * congress)
+    return [first_year, first_year + 1]
+
+
+# ============================================================
 # MAIN BUILD
 # ============================================================
 
 def main():
-    xml_files = get_xml_files()
+    args = parse_args()
+
+    congress = args.congress
+    years = congress_years(congress)
+
+    roll_call_output = (
+        Path("data/processed/roll_calls")
+        / f"roll_calls_{congress}.csv"
+    )
+
+    member_vote_output = (
+        Path("data/processed/members")
+        / f"member_votes_{congress}.csv"
+    )
+
+    validation_output = (
+        Path("data/diagnostics")
+        / f"xml_validation_{congress}.csv"
+    )
+
+    xml_files = get_xml_files(years)
 
     if not xml_files:
         raise FileNotFoundError(
@@ -166,7 +208,8 @@ def main():
 
     print("BipartisanCurious canonical dataset builder")
     print("-------------------------------------------")
-    print(f"Congress: {CONGRESS}")
+    print(f"Congress: {congress}")
+    print(f"Years: {years}")
     print(f"XML files found: {len(xml_files):,}")
 
     roll_call_rows = []
@@ -202,12 +245,11 @@ def main():
             continue
 
         # Only build the requested Congress.
-        if metadata["congress"] != CONGRESS:
-            print(
-                f"\nWARNING: Skipping {xml_path}: "
-                f"XML says Congress {metadata['congress']}"
+        if metadata["congress"] != congress:
+            raise RuntimeError(
+                f"{xml_path}: expected Congress {congress}, "
+                f"but XML says Congress {metadata['congress']}."
             )
-            continue
 
         # --------------------------------------------
         # Identity diagnostics
@@ -560,24 +602,24 @@ def main():
 
     atomic_write_csv(
         roll_calls,
-        ROLL_CALL_OUTPUT,
+        roll_call_output,
     )
 
     atomic_write_csv(
         member_votes_all,
-        MEMBER_VOTE_OUTPUT,
+        member_vote_output,
     )
 
     atomic_write_csv(
         validation_all,
-        VALIDATION_OUTPUT,
+        validation_output,
     )
 
     print("\nOUTPUTS")
     print("-------")
-    print(f"Roll calls:   {ROLL_CALL_OUTPUT}")
-    print(f"Member votes: {MEMBER_VOTE_OUTPUT}")
-    print(f"Validation:   {VALIDATION_OUTPUT}")
+    print(f"Roll calls:   {roll_call_output}")
+    print(f"Member votes: {member_vote_output}")
+    print(f"Validation:   {validation_output}")
 
     print("\nBUILD PASSED")
     print(

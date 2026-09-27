@@ -1,0 +1,436 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BipartisanCurious</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #app {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 360px;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        #panel {
+            box-sizing: border-box;
+            padding: 24px;
+            overflow-y: auto;
+            border-left: 1px solid #ccc;
+            background: white;
+        }
+
+        #panel h1 {
+            margin-top: 0;
+            margin-bottom: 4px;
+            font-size: 24px;
+        }
+
+        #panel .subtitle {
+            margin-top: 0;
+            color: #555;
+        }
+
+        #panel .intro {
+            line-height: 1.5;
+            color: #444;
+        }
+
+        .member-name {
+            margin-bottom: 4px;
+            font-size: 24px;
+        }
+
+        .member-meta {
+            margin-top: 0;
+            margin-bottom: 28px;
+            color: #555;
+        }
+
+        .section-label {
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            color: #666;
+        }
+
+        .section-explainer {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #666;
+        }
+
+        .methodology {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #bbb;
+            font-size: 13px;
+            line-height: 1.45;
+            color: #444;
+        }
+
+        .methodology h3 {
+            margin: 0 0 16px;
+            font-size: 16px;
+            color: #111;
+        }
+
+        .methodology p {
+            margin: 0 0 14px;
+        }
+
+        .methodology strong {
+            color: #222;
+        }
+
+        .stat {
+            padding: 14px 0;
+            border-top: 1px solid #ddd;
+        }
+
+        .stat:last-child {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .stat-label {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .stat-detail {
+            margin-top: 3px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .vacant {
+            margin-top: 24px;
+            padding: 14px;
+            background: #f2f2f2;
+        }
+
+        @media (max-width: 800px) {
+            #app {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60% 40%;
+            }
+
+            #panel {
+                border-left: 0;
+                border-top: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="app">
+    <div id="map"></div>
+
+    <aside id="panel">
+        <h1>BipartisanCurious</h1>
+        <p class="subtitle">119th Congress</p>
+
+        <p class="intro">
+            Select a congressional district to examine how its
+            representative voted when the Republican and Democratic
+            majorities took opposing positions.
+        </p>
+    </aside>
+</div>
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<script>
+    const map = L.map("map", {
+        zoomControl: true
+    }).setView([38.5, -96], 4);
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 18,
+            attribution: "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(map);
+
+
+    function percent(value) {
+        if (value === null || value === undefined) {
+            return "—";
+        }
+
+        return (value * 100).toFixed(1) + "%";
+    }
+
+
+    function number(value) {
+        if (value === null || value === undefined) {
+            return "—";
+        }
+
+        return Number(value).toLocaleString();
+    }
+
+
+    function partyName(code) {
+        if (code === "R") {
+            return "Republican";
+        }
+
+        if (code === "D") {
+            return "Democratic";
+        }
+
+        return code || "Unknown";
+    }
+
+
+    function districtLabel(properties) {
+        return `${properties.state}-${properties.district}`;
+    }
+
+
+    function showDistrict(properties) {
+        const panel = document.getElementById("panel");
+
+        if (!properties.bioguide_id) {
+            panel.innerHTML = `
+                <h1>${districtLabel(properties)}</h1>
+
+                <div class="vacant">
+                    This congressional seat is currently vacant.
+                </div>
+            `;
+
+            return;
+        }
+
+        panel.innerHTML = `
+            <h2 class="member-name">
+                ${properties.official_name}
+            </h2>
+
+            <p class="member-meta">
+                ${partyName(properties.party)}
+                ·
+                ${districtLabel(properties)}
+            </p>
+
+            <div class="section-label">
+                WHEN THE PARTIES DISAGREED
+            </div>
+
+            <p class="section-explainer">
+                Roll calls where Republican and Democratic
+                voting majorities took opposite positions.
+            </p>
+
+            <div class="stat">
+                <div class="stat-label">
+                    Voted with own party majority
+                </div>
+
+                <div class="stat-value">
+                    ${percent(properties.party_unity_rate)}
+                </div>
+
+                <div class="stat-detail">
+                    ${number(properties.with_own_party_unity)}
+                    of
+                    ${number(properties.party_unity_votes_cast)}
+                    votes cast
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">
+                    Voted against own party majority
+                </div>
+
+                <div class="stat-value">
+                    ${percent(properties.party_opposition_rate)}
+                </div>
+
+                <div class="stat-detail">
+                    ${number(properties.against_own_party_unity)}
+                    of
+                    ${number(properties.party_unity_votes_cast)}
+                    votes cast
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">
+                    Did not vote
+                </div>
+
+                <div class="stat-value">
+                    ${number(properties.party_unity_not_voting)}
+                </div>
+
+                <div class="stat-detail">
+                    of
+                    ${number(properties.party_unity_opportunities)}
+                    qualifying roll calls
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">
+                    Participation
+                </div>
+
+                <div class="stat-value">
+                    ${percent(
+                        properties.party_unity_participation_rate
+                    )}
+                </div>
+
+                <div class="stat-detail">
+                    ${number(properties.party_unity_votes_cast)}
+                    of
+                    ${number(properties.party_unity_opportunities)}
+                    qualifying roll calls
+                </div>
+            </div>
+
+            <div class="methodology">
+                <h3>About these numbers</h3>
+
+                <p>
+                    <strong>What is a qualifying roll call?</strong><br>
+                    A roll call qualifies when a majority of
+                    Republicans casting a Yea or Nay vote took one
+                    position and a majority of Democrats casting a
+                    Yea or Nay vote took the opposite position.
+                </p>
+
+                <p>
+                    <strong>With or against party</strong><br>
+                    A representative is counted as voting with their
+                    party when their Yea or Nay vote matches the
+                    majority position of their party, and against
+                    their party when it does not.
+                </p>
+
+                <p>
+                    <strong>Not voting and participation</strong><br>
+                    Present and Not Voting responses are not included
+                    in the with-party or against-party percentages.
+                    Participation shows the share of qualifying roll
+                    calls on which the representative cast a Yea or
+                    Nay vote.
+                </p>
+
+                <p>
+                    <strong>Scope</strong><br>
+                    These figures currently cover the 119th Congress.
+                    Roll calls involving territorial delegates or the
+                    resident commissioner are excluded from this
+                    analysis.
+                </p>
+            </div>
+        `;
+    }
+
+
+    function districtStyle() {
+        return {
+            color: "#555",
+            weight: 1,
+            opacity: 1,
+            fillColor: "#d9d9d9",
+            fillOpacity: 0.65
+        };
+    }
+
+
+    fetch("data/districts_119.geojson")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(
+                    `GeoJSON request failed: ${response.status}`
+                );
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            const districts = L.geoJSON(data, {
+                style: districtStyle,
+
+                onEachFeature: (feature, layer) => {
+                    const properties = feature.properties;
+
+                    layer.bindTooltip(
+                        `${districtLabel(properties)} — ` +
+                        (
+                            properties.official_name ||
+                            "Vacant"
+                        ),
+                        {
+                            sticky: true
+                        }
+                    );
+
+                    layer.on("click", () => {
+                        showDistrict(properties);
+
+                        layer.setStyle({
+                            weight: 3
+                        });
+                    });
+                }
+            }).addTo(map);
+
+            map.fitBounds(districts.getBounds(), {
+                padding: [10, 10]
+            });
+        })
+        .catch(error => {
+            console.error(error);
+
+            document.getElementById("panel").innerHTML = `
+                <h1>BipartisanCurious</h1>
+
+                <p>
+                    The congressional district data could not be loaded.
+                </p>
+
+                <pre>${error.message}</pre>
+            `;
+        });
+</script>
+
+</body>
+</html>
