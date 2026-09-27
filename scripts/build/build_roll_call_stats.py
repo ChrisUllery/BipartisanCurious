@@ -10,6 +10,11 @@ ROLL_CALL_FILE = (
     / f"roll_calls_{CONGRESS}.csv"
 )
 
+MEMBER_VOTES_FILE = (
+    Path("data/processed/members")
+    / f"member_votes_{CONGRESS}.csv"
+)
+
 OUTPUT_FILE = (
     Path("data/processed/roll_calls")
     / f"roll_call_stats_{CONGRESS}.csv"
@@ -308,6 +313,30 @@ def build_stats(row):
 
 def main():
     df = pd.read_csv(ROLL_CALL_FILE)
+    member_votes = pd.read_csv(MEMBER_VOTES_FILE)
+
+    # --------------------------------------------------------
+    # Identify roll calls containing Clerk state code XX.
+    #
+    # These records are preserved in the canonical datasets.
+    # The flag allows downstream analytical tables to exclude
+    # this distinct voting universe without deleting source data.
+    # --------------------------------------------------------
+
+    roll_key = [
+        "congress",
+        "session",
+        "roll_number",
+    ]
+
+    xx_rolls = (
+        member_votes.loc[
+            member_votes["state"] == "XX",
+            roll_key,
+        ]
+        .drop_duplicates()
+        .assign(has_xx_member=True)
+    )
 
     print("BipartisanCurious full roll-call statistics builder")
     print("---------------------------------------------------")
@@ -364,6 +393,23 @@ def main():
         f"{len(unresolved):,}"
     )
 
+    # --------------------------------------------------------
+    # Attach XX-member roll-call flag
+    # --------------------------------------------------------
+
+    output = output.merge(
+        xx_rolls,
+        on=roll_key,
+        how="left",
+        validate="one_to_one",
+    )
+
+    output["has_xx_member"] = (
+        output["has_xx_member"]
+        .fillna(False)
+        .astype(bool)
+    )
+
     # Verify standard party-total roll calls reproduce the
     # original member-record counts. Candidate-choice votes use
     # candidate names rather than Yea/Nay and were validated
@@ -381,6 +427,40 @@ def main():
         )
         != standard_output["house_members_recorded"]
     ]
+
+    xx_count = int(output["has_xx_member"].sum())
+
+    unity_mask = (
+        output["party_unity_vote"]
+        .fillna(False)
+        .astype(bool)
+    )
+
+    unity_xx_count = int(
+        (
+            unity_mask
+            & output["has_xx_member"]
+        ).sum()
+    )
+
+    unity_no_xx_count = int(
+        (
+            unity_mask
+            & ~output["has_xx_member"]
+        ).sum()
+    )
+
+    print("\nANALYTICAL SCOPE")
+    print("----------------")
+    print(f"Rolls with XX members:       {xx_count:,}")
+    print(
+        "Party-unity rolls with XX: "
+        f"{unity_xx_count:,}"
+    )
+    print(
+        "Party-unity rolls without: "
+        f"{unity_no_xx_count:,}"
+    )
 
     print("\nQUALITY CHECKS")
     print("--------------")

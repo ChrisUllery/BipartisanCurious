@@ -178,6 +178,7 @@ def main():
 
         # Party-unity and vote-context measures
         "party_unity_vote",
+        "has_xx_member",
         "parties_opposed",
         "parties_same_side",
         "party_separation",
