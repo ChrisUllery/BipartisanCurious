@@ -19,7 +19,7 @@ data/raw/clerk_xml/*
 data/raw/census/*
 
 # Generated/processed data
-data/processed/*
+data/processed/**/*.csv
 data/diagnostics/*
 
 # Keep empty directory structure in Git
