@@ -179,6 +179,151 @@
             background: #f2f2f2;
         }
 
+        .member-detail-button,
+        .member-detail-back,
+        .member-detail-more {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            background: white;
+            font: inherit;
+            font-weight: bold;
+            color: #222;
+            cursor: pointer;
+        }
+
+        .member-detail-button {
+            margin-top: 22px;
+        }
+
+        .member-detail-back {
+            margin-bottom: 22px;
+        }
+
+        .member-detail-more {
+            margin-top: 18px;
+        }
+
+        .member-detail-button:hover,
+        .member-detail-back:hover,
+        .member-detail-more:hover {
+            background: #f2f2f2;
+        }
+
+        .detail-controls {
+            margin: 20px 0;
+        }
+
+        .detail-control {
+            margin-bottom: 14px;
+        }
+
+        .detail-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            color: #666;
+        }
+
+        .detail-control select {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            background: white;
+            font: inherit;
+            color: #222;
+        }
+
+        .detail-total {
+            margin: 0 0 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .detail-record {
+            padding: 16px 0;
+            border-top: 1px solid #ddd;
+        }
+
+        .detail-record:last-child {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .detail-record-meta {
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .detail-record h4 {
+            margin: 0 0 6px;
+            font-size: 15px;
+            line-height: 1.3;
+        }
+
+        .detail-question {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.35;
+        }
+
+        .detail-description {
+            margin: 0 0 12px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #444;
+        }
+
+        .detail-positions {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .detail-position {
+            padding: 8px 4px;
+            background: #f4f4f4;
+            text-align: center;
+        }
+
+        .detail-position-label {
+            display: block;
+            min-height: 24px;
+            margin-bottom: 4px;
+            font-size: 10px;
+            line-height: 1.2;
+            color: #666;
+        }
+
+        .detail-position-value {
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .detail-clerk-link {
+            display: inline-block;
+            margin-top: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .detail-status {
+            margin: 18px 0;
+            padding: 14px;
+            background: #f2f2f2;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #444;
+        }
+
         #history-chart {
             grid-column: 1;
             grid-row: 2;
@@ -1009,6 +1154,563 @@
     }
 
 
+    const DETAIL_PAGE_SIZE = 25;
+
+    let detailState = {
+        data: null,
+        properties: null,
+        category: "against_own_party_majority",
+        congress: "all",
+        visible: DETAIL_PAGE_SIZE
+    };
+
+
+    function detailCategoryLabel(category) {
+        if (category === "against_own_party_majority") {
+            return "Against own party majority";
+        }
+
+        if (category === "against_both_party_majorities") {
+            return "Against both party majorities";
+        }
+
+        if (category === "not_voting") {
+            return "Did not vote";
+        }
+
+        return category;
+    }
+
+
+    function detailCategoryOptions() {
+        const categories = [
+            "against_own_party_majority",
+            "against_both_party_majorities",
+            "not_voting"
+        ];
+
+        return categories.map(category => {
+            const selected =
+                category === detailState.category
+                    ? " selected"
+                    : "";
+
+            return `
+                <option value="${category}"${selected}>
+                    ${detailCategoryLabel(category)}
+                </option>
+            `;
+        }).join("");
+    }
+
+
+    function detailCongressKeys() {
+        if (
+            !detailState.data ||
+            !detailState.data.categories ||
+            !detailState.data.categories[
+                detailState.category
+            ]
+        ) {
+            return [];
+        }
+
+        return Object.keys(
+            detailState.data.categories[
+                detailState.category
+            ]
+        ).sort(
+            (a, b) => Number(b) - Number(a)
+        );
+    }
+
+
+    function detailCongressOptions() {
+        const congresses = detailCongressKeys();
+
+        let html = `
+            <option
+                value="all"
+                ${detailState.congress === "all"
+                    ? " selected"
+                    : ""}
+            >
+                All available
+            </option>
+        `;
+
+        for (const congress of congresses) {
+            const selected =
+                detailState.congress === congress
+                    ? " selected"
+                    : "";
+
+            html += `
+                <option value="${congress}"${selected}>
+                    ${congress}th Congress
+                </option>
+            `;
+        }
+
+        return html;
+    }
+
+
+    function detailVotes() {
+        const categoryData =
+            detailState.data.categories[
+                detailState.category
+            ] || {};
+
+        if (detailState.congress !== "all") {
+            return (
+                categoryData[detailState.congress] || []
+            );
+        }
+
+        const congresses = Object.keys(
+            categoryData
+        ).sort(
+            (a, b) => Number(b) - Number(a)
+        );
+
+        const votes = [];
+
+        for (const congress of congresses) {
+            votes.push(
+                ...categoryData[congress]
+            );
+        }
+
+        return votes;
+    }
+
+
+    function detailRecordHtml(vote) {
+        const legislation =
+            vote.legislation_number ||
+            "House roll call";
+
+        const question =
+            vote.vote_question
+                ? `
+                    <p class="detail-question">
+                        ${vote.vote_question}
+                    </p>
+                `
+                : "";
+
+        const description =
+            vote.vote_description
+                ? `
+                    <p class="detail-description">
+                        ${vote.vote_description}
+                    </p>
+                `
+                : "";
+
+        return `
+            <article class="detail-record">
+                <div class="detail-record-meta">
+                    ${formatVoteDetailDate(vote.date)}
+                    &bull;
+                    ${vote.congress}th Congress
+                    &bull;
+                    Roll Call ${number(vote.roll_number)}
+                </div>
+
+                <h4>${legislation}</h4>
+
+                ${question}
+                ${description}
+
+                <div class="detail-positions">
+                    <div class="detail-position">
+                        <span class="detail-position-label">
+                            Member vote
+                        </span>
+
+                        <span class="detail-position-value">
+                            ${vote.vote || "?"}
+                        </span>
+                    </div>
+
+                    <div class="detail-position">
+                        <span class="detail-position-label">
+                            Republican majority
+                        </span>
+
+                        <span class="detail-position-value">
+                            ${vote.republican_position || "?"}
+                        </span>
+                    </div>
+
+                    <div class="detail-position">
+                        <span class="detail-position-label">
+                            Democratic majority
+                        </span>
+
+                        <span class="detail-position-value">
+                            ${vote.democratic_position || "?"}
+                        </span>
+                    </div>
+                </div>
+
+                <a
+                    class="detail-clerk-link"
+                    href="${vote.clerk_url}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    View official House Clerk roll call &rarr;
+                </a>
+            </article>
+        `;
+    }
+
+
+    function formatVoteDetailDate(dateString) {
+        if (!dateString) {
+            return "";
+        }
+
+        const match = String(dateString).match(
+            /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/
+        );
+
+        if (!match) {
+            return dateString;
+        }
+
+        const day = Number(match[1]);
+        const month = match[2];
+        const year = match[3];
+
+        return `${month} ${day}, ${year}`;
+    }
+
+
+    function renderMemberDetail() {
+        const panel =
+            document.getElementById("panel");
+
+        const properties =
+            detailState.properties;
+
+        const data =
+            detailState.data;
+
+        const votes =
+            detailVotes();
+
+        const visibleVotes =
+            votes.slice(
+                0,
+                detailState.visible
+            );
+
+        const overallPeriod =
+            historyData.periods[
+                "all_available:2017_present"
+            ];
+
+        const overallRecord =
+            overallPeriod &&
+            overallPeriod.members[
+                properties.bioguide_id
+            ];
+
+        const displayedName =
+            overallRecord &&
+            overallRecord.name
+                ? overallRecord.name
+                : properties.official_name;
+
+        const displayedParty =
+            overallRecord &&
+            overallRecord.party_code
+                ? partyName(
+                    overallRecord.party_code
+                )
+                : partyName(
+                    properties.party
+                );
+
+        const dateText =
+            memberHistoryDateText(
+                properties.bioguide_id
+            );
+
+        let recordsHtml;
+
+        if (visibleVotes.length) {
+            recordsHtml =
+                visibleVotes
+                    .map(detailRecordHtml)
+                    .join("");
+        } else {
+            recordsHtml = `
+                <div class="detail-status">
+                    No votes are available for this
+                    category and Congress.
+                </div>
+            `;
+        }
+
+        const moreHtml =
+            detailState.visible < votes.length
+                ? `
+                    <button
+                        id="member-detail-more"
+                        class="member-detail-more"
+                        type="button"
+                    >
+                        Show 25 more
+                    </button>
+                `
+                : "";
+
+        panel.innerHTML = `
+            <button
+                id="member-detail-back"
+                class="member-detail-back"
+                type="button"
+            >
+                &larr; Back to summary
+            </button>
+
+            <h2 class="member-name">
+                ${displayedName}
+            </h2>
+
+            <p class="member-meta">
+                ${displayedParty}
+                &bull;
+                ${districtLabel(properties)}
+            </p>
+
+            <div class="section-label">
+                VOTING RECORD DETAILS
+            </div>
+
+            <p class="section-explainer">
+                Individual roll calls identified by the
+                BipartisanCurious analysis. Each record links
+                directly to the official House Clerk roll call.
+            </p>
+
+            ${
+                dateText
+                    ? `
+                        <div class="period-dates">
+                            Available record:
+                            ${dateText}
+                        </div>
+                    `
+                    : ""
+            }
+
+            <div class="detail-controls">
+                <div class="detail-control">
+                    <label for="detail-category-select">
+                        CATEGORY
+                    </label>
+
+                    <select id="detail-category-select">
+                        ${detailCategoryOptions()}
+                    </select>
+                </div>
+
+                <div class="detail-control">
+                    <label for="detail-congress-select">
+                        CONGRESS
+                    </label>
+
+                    <select id="detail-congress-select">
+                        ${detailCongressOptions()}
+                    </select>
+                </div>
+            </div>
+
+            <p class="detail-total">
+                <strong>
+                    ${number(votes.length)}
+                    ${votes.length === 1
+                        ? "vote"
+                        : "votes"}
+                </strong>
+                in this view
+                ${
+                    votes.length > visibleVotes.length
+                        ? ` &bull; showing ${number(
+                            visibleVotes.length
+                        )}`
+                        : ""
+                }
+            </p>
+
+            <div id="member-detail-records">
+                ${recordsHtml}
+            </div>
+
+            ${moreHtml}
+        `;
+
+        document
+            .getElementById(
+                "member-detail-back"
+            )
+            .addEventListener(
+                "click",
+                () => {
+                    showDistrict(properties);
+                }
+            );
+
+        document
+            .getElementById(
+                "detail-category-select"
+            )
+            .addEventListener(
+                "change",
+                event => {
+                    detailState.category =
+                        event.target.value;
+
+                    detailState.congress =
+                        "all";
+
+                    detailState.visible =
+                        DETAIL_PAGE_SIZE;
+
+                    renderMemberDetail();
+                }
+            );
+
+        document
+            .getElementById(
+                "detail-congress-select"
+            )
+            .addEventListener(
+                "change",
+                event => {
+                    detailState.congress =
+                        event.target.value;
+
+                    detailState.visible =
+                        DETAIL_PAGE_SIZE;
+
+                    renderMemberDetail();
+                }
+            );
+
+        const moreButton =
+            document.getElementById(
+                "member-detail-more"
+            );
+
+        if (moreButton) {
+            moreButton.addEventListener(
+                "click",
+                () => {
+                    detailState.visible +=
+                        DETAIL_PAGE_SIZE;
+
+                    renderMemberDetail();
+                }
+            );
+        }
+    }
+
+
+    async function showMemberDetail(properties) {
+        const panel =
+            document.getElementById("panel");
+
+        panel.innerHTML = `
+            <h2 class="member-name">
+                ${properties.official_name}
+            </h2>
+
+            <p class="member-meta">
+                ${partyName(properties.party)}
+                &bull;
+                ${districtLabel(properties)}
+            </p>
+
+            <div class="detail-status">
+                Loading precompiled voting records...
+            </div>
+        `;
+
+        try {
+            const response = await fetch(
+                `data/member_votes/${
+                    properties.bioguide_id
+                }.json`
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+            }
+
+            const data =
+                await response.json();
+
+            detailState = {
+                data,
+                properties,
+                category:
+                    "against_own_party_majority",
+                congress: "all",
+                visible: DETAIL_PAGE_SIZE
+            };
+
+            renderMemberDetail();
+        } catch (error) {
+            console.error(error);
+
+            panel.innerHTML = `
+                <h2 class="member-name">
+                    ${properties.official_name}
+                </h2>
+
+                <p class="member-meta">
+                    ${partyName(properties.party)}
+                    &bull;
+                    ${districtLabel(properties)}
+                </p>
+
+                <div class="detail-status">
+                    Voting record details could not
+                    be loaded.
+                </div>
+
+                <button
+                    id="member-detail-back"
+                    class="member-detail-back"
+                    type="button"
+                >
+                    &larr; Back to summary
+                </button>
+            `;
+
+            document
+                .getElementById(
+                    "member-detail-back"
+                )
+                .addEventListener(
+                    "click",
+                    () => {
+                        showDistrict(properties);
+                    }
+                );
+        }
+    }
+
+
     function showDistrict(properties) {
         const panel = document.getElementById("panel");
 
@@ -1105,6 +1807,16 @@
 
             ${recordHtml}
 
+            ${record ? `
+                <button
+                    id="member-detail-button"
+                    class="member-detail-button"
+                    type="button"
+                >
+                    View vote details
+                </button>
+            ` : ""}
+
             ${methodologyHtml()}
         `;
 
@@ -1119,6 +1831,20 @@
                     );
                 }
             );
+
+        const memberDetailButton =
+            document.getElementById(
+                "member-detail-button"
+            );
+
+        if (memberDetailButton) {
+            memberDetailButton.addEventListener(
+                "click",
+                () => {
+                    showMemberDetail(properties);
+                }
+            );
+        }
     }
 
 
