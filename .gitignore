@@ -33,3 +33,12 @@ data/diagnostics/*
 # Temporary files
 *.tmp
 *.log
+
+# Allow processed subdirectories so their .gitkeep files can be tracked
+!data/processed/
+!data/processed/roll_calls/
+!data/processed/members/
+!data/processed/map/
+!data/processed/roll_calls/.gitkeep
+!data/processed/members/.gitkeep
+!data/processed/map/.gitkeep
