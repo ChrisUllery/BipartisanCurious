@@ -22,15 +22,21 @@
         #app {
             display: grid;
             grid-template-columns: minmax(0, 1fr) 360px;
+            grid-template-rows: minmax(0, 1fr) auto;
             height: 100%;
         }
 
         #map {
+            grid-column: 1;
+            grid-row: 1;
             width: 100%;
             height: 100%;
+            min-height: 0;
         }
 
         #panel {
+            grid-column: 2;
+            grid-row: 1 / 3;
             box-sizing: border-box;
             padding: 24px;
             overflow-y: auto;
@@ -173,15 +179,184 @@
             background: #f2f2f2;
         }
 
+        #history-chart {
+            grid-column: 1;
+            grid-row: 2;
+            box-sizing: border-box;
+            overflow-y: visible;
+            padding: 16px 22px 18px;
+            border-top: 1px solid #ccc;
+            background: white;
+        }
+
+        .history-empty {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 14px;
+        }
+
+        .history-title {
+            margin: 0 0 3px;
+            font-size: 16px;
+        }
+
+        .history-subtitle {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .history-view-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+        }
+
+        .history-view-control label {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            color: #666;
+        }
+
+        .history-view-control select {
+            padding: 6px 8px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            background: white;
+            font: inherit;
+        }
+
+        .history-bars {
+            display: grid;
+            gap: 8px;
+        }
+
+        .history-row {
+            display: grid;
+            grid-template-columns: 125px minmax(120px, 1fr) 92px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-row-label {
+            overflow: hidden;
+            font-size: 12px;
+            font-weight: bold;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-bar {
+            display: flex;
+            height: 18px;
+            overflow: hidden;
+            border-radius: 3px;
+            background: #e5e5e5;
+        }
+
+        .history-segment {
+            height: 100%;
+        }
+
+        .history-segment.with-party.party-r,
+        .history-segment.against-party.party-d {
+            background: #c94b4b;
+        }
+
+        .history-segment.with-party.party-d,
+        .history-segment.against-party.party-r {
+            background: #4b72c9;
+        }
+
+        .history-segment.with-party.party-i {
+            background: #777;
+        }
+
+        .history-segment.against-party.party-i {
+            background: #bbb;
+        }
+
+        .history-row-value {
+            font-size: 12px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .history-row-value strong {
+            font-size: 13px;
+        }
+
+        .history-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .history-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .history-swatch {
+            width: 11px;
+            height: 11px;
+            border-radius: 2px;
+        }
+
         @media (max-width: 800px) {
+            html,
+            body {
+                height: auto;
+                min-height: 100%;
+            }
+
             #app {
                 grid-template-columns: 1fr;
-                grid-template-rows: 60% 40%;
+                grid-template-rows: 55vh auto auto;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            #map {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            #history-chart {
+                grid-column: 1;
+                grid-row: 2;
+                max-height: none;
             }
 
             #panel {
+                grid-column: 1;
+                grid-row: 3;
+                overflow-y: visible;
                 border-left: 0;
                 border-top: 1px solid #ccc;
+            }
+
+            .history-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .history-row {
+                grid-template-columns: 82px minmax(90px, 1fr) 76px;
+                gap: 7px;
             }
         }
     </style>
@@ -191,6 +366,13 @@
 
 <div id="app">
     <div id="map"></div>
+
+    <section id="history-chart">
+        <div class="history-empty">
+            Select a congressional district to view its voting
+            record over time.
+        </div>
+    </section>
 
     <aside id="panel">
         <h1>BipartisanCurious</h1>
@@ -259,8 +441,9 @@
 
 
     let historyData = null;
-    let selectedPeriodKey = "congress:119";
+    let selectedPeriodKey = "all_available:2017_present";
     let selectedDistrictProperties = null;
+    let selectedHistoryView = "congress";
 
 
     function formatDate(dateString) {
@@ -347,6 +530,23 @@
         }
 
         return `${start} – ${end}`;
+    }
+
+
+    function memberPeriodDateText(period, record) {
+        if (
+            record &&
+            record.first_vote_date &&
+            record.last_vote_date
+        ) {
+            return (
+                formatDate(record.first_vote_date) +
+                " &#8211; " +
+                formatDate(record.last_vote_date)
+            );
+        }
+
+        return periodDateText(period);
     }
 
 
@@ -493,10 +693,328 @@
     }
 
 
+    function historyViewLabel(view) {
+        if (view === "congress") {
+            return "Congress";
+        }
+
+        if (view === "year") {
+            return "Year";
+        }
+
+        if (view === "presidential") {
+            return "Presidential term";
+        }
+
+        return view;
+    }
+
+
+    function historyRecordsForMember(bioguideId, view) {
+        if (!historyData || !bioguideId) {
+            return [];
+        }
+
+        const records = [];
+
+        for (const key of historyData.period_order) {
+            const period = historyData.periods[key];
+
+            if (period.type !== view) {
+                continue;
+            }
+
+            const record = period.members[bioguideId];
+
+            if (!record) {
+                continue;
+            }
+
+            records.push({
+                key,
+                period,
+                record
+            });
+        }
+
+        return records;
+    }
+
+
+    function historyPartyClass(record) {
+        if (record.party_code === "R") {
+            return "party-r";
+        }
+
+        if (record.party_code === "D") {
+            return "party-d";
+        }
+
+        return "party-i";
+    }
+
+
+    function memberHistoryDateText(bioguideId) {
+        if (!historyData || !bioguideId) {
+            return "";
+        }
+
+        const overallPeriod =
+            historyData.periods["all_available:2017_present"];
+
+        if (!overallPeriod) {
+            return "";
+        }
+
+        const record =
+            overallPeriod.members[bioguideId];
+
+        if (
+            !record ||
+            !record.first_vote_date ||
+            !record.last_vote_date
+        ) {
+            return "";
+        }
+
+        return (
+            formatDate(record.first_vote_date) +
+            " &#8211; " +
+            formatDate(record.last_vote_date)
+        );
+    }
+
+
+    function renderHistoryChart(properties) {
+        const chart =
+            document.getElementById("history-chart");
+
+        if (
+            !historyData ||
+            !properties ||
+            !properties.bioguide_id
+        ) {
+            chart.innerHTML = `
+                <div class="history-empty">
+                    Select a congressional district to view its
+                    voting record over time.
+                </div>
+            `;
+
+            return;
+        }
+
+        const rows = historyRecordsForMember(
+            properties.bioguide_id,
+            selectedHistoryView
+        );
+
+        if (rows.length === 0) {
+            chart.innerHTML = `
+                <div class="history-header">
+                    <div>
+                        <h3 class="history-title">
+                            Voting record over time
+                        </h3>
+                    </div>
+
+                    ${historyViewControl()}
+                </div>
+
+                <div class="history-empty">
+                    No ${historyViewLabel(
+                        selectedHistoryView
+                    ).toLowerCase()} history is available for
+                    ${properties.official_name}.
+                </div>
+            `;
+
+            bindHistoryViewControl(properties);
+            return;
+        }
+
+        let bars = "";
+
+        for (const item of rows) {
+            const record = item.record;
+            const partyClass =
+                historyPartyClass(record);
+
+            const withPercent =
+                record.unity_rate === null
+                    ? 0
+                    : record.unity_rate * 100;
+
+            const againstPercent =
+                record.opposition_rate === null
+                    ? 0
+                    : record.opposition_rate * 100;
+
+            const title =
+                `${item.period.label}: ` +
+                `${number(record.with_party)} with party, ` +
+                `${number(record.against_party)} against party ` +
+                `of ${number(record.votes_cast)} votes cast`;
+
+            bars += `
+                <div class="history-row">
+                    <div
+                        class="history-row-label"
+                        title="${item.period.label}"
+                    >
+                        ${item.period.label}
+                    </div>
+
+                    <div
+                        class="history-bar"
+                        title="${title}"
+                    >
+                        <div
+                            class="history-segment with-party ${partyClass}"
+                            style="width: ${withPercent}%"
+                        ></div>
+
+                        <div
+                            class="history-segment against-party ${partyClass}"
+                            style="width: ${againstPercent}%"
+                        ></div>
+                    </div>
+
+                    <div class="history-row-value">
+                        <strong>
+                            ${percent(record.opposition_rate)}
+                        </strong>
+                        against
+                    </div>
+                </div>
+            `;
+        }
+
+        const firstRecord = rows[0].record;
+        const legendPartyClass =
+            historyPartyClass(firstRecord);
+
+        chart.innerHTML = `
+            <div class="history-header">
+                <div>
+                    <h3 class="history-title">
+                        Voting record over time
+                    </h3>
+
+                    <p class="history-subtitle">
+                        Share of qualifying Yea/Nay votes cast
+                        with or against the representative's
+                        party majority.
+                        ${memberHistoryDateText(
+                            properties.bioguide_id
+                        )
+                            ? `<br>Available record: ${
+                                memberHistoryDateText(
+                                    properties.bioguide_id
+                                )
+                            }`
+                            : ""}
+                    </p>
+                </div>
+
+                ${historyViewControl()}
+            </div>
+
+            <div class="history-bars">
+                ${bars}
+            </div>
+
+            <div class="history-legend">
+                <span class="history-legend-item">
+                    <span
+                        class="history-swatch history-segment with-party ${legendPartyClass}"
+                    ></span>
+                    With own party
+                </span>
+
+                <span class="history-legend-item">
+                    <span
+                        class="history-swatch history-segment against-party ${legendPartyClass}"
+                    ></span>
+                    Against own party
+                </span>
+            </div>
+        `;
+
+        bindHistoryViewControl(properties);
+
+        requestAnimationFrame(() => {
+            map.invalidateSize();
+        });
+    }
+
+
+    function historyViewControl() {
+        return `
+            <div class="history-view-control">
+                <label for="history-view-select">
+                    VIEW BY
+                </label>
+
+                <select id="history-view-select">
+                    <option
+                        value="congress"
+                        ${selectedHistoryView === "congress"
+                            ? "selected"
+                            : ""}
+                    >
+                        Congress
+                    </option>
+
+                    <option
+                        value="year"
+                        ${selectedHistoryView === "year"
+                            ? "selected"
+                            : ""}
+                    >
+                        Year
+                    </option>
+
+                    <option
+                        value="presidential"
+                        ${selectedHistoryView === "presidential"
+                            ? "selected"
+                            : ""}
+                    >
+                        Presidential term
+                    </option>
+                </select>
+            </div>
+        `;
+    }
+
+
+    function bindHistoryViewControl(properties) {
+        const select =
+            document.getElementById("history-view-select");
+
+        if (!select) {
+            return;
+        }
+
+        select.addEventListener(
+            "change",
+            event => {
+                selectedHistoryView =
+                    event.target.value;
+
+                renderHistoryChart(properties);
+            }
+        );
+    }
+
+
     function showDistrict(properties) {
         const panel = document.getElementById("panel");
 
         selectedDistrictProperties = properties;
+
+        renderHistoryChart(properties);
 
         if (!properties.bioguide_id) {
             panel.innerHTML = `
@@ -581,7 +1099,7 @@
                 </select>
 
                 <div class="period-dates">
-                    ${periodDateText(period)}
+                    ${memberPeriodDateText(period, record)}
                 </div>
             </div>
 

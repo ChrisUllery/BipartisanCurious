@@ -30,9 +30,22 @@ DASHBOARD_PERIODS = [
     ("congress", "117"),
     ("congress", "118"),
     ("congress", "119"),
+
+    ("year", "2017"),
+    ("year", "2018"),
+    ("year", "2019"),
+    ("year", "2020"),
+    ("year", "2021"),
+    ("year", "2022"),
+    ("year", "2023"),
+    ("year", "2024"),
+    ("year", "2025"),
+    ("year", "2026"),
+
     ("presidential", "trump_1"),
     ("presidential", "biden"),
     ("presidential", "trump_2"),
+
     ("all_available", "2017_present"),
 ]
 
@@ -70,8 +83,48 @@ PERIOD_METADATA = {
         "label": "Trump II",
         "group": "Presidency",
     },
+    ("year", "2017"): {
+        "label": "2017",
+        "group": "Year",
+    },
+    ("year", "2018"): {
+        "label": "2018",
+        "group": "Year",
+    },
+    ("year", "2019"): {
+        "label": "2019",
+        "group": "Year",
+    },
+    ("year", "2020"): {
+        "label": "2020",
+        "group": "Year",
+    },
+    ("year", "2021"): {
+        "label": "2021",
+        "group": "Year",
+    },
+    ("year", "2022"): {
+        "label": "2022",
+        "group": "Year",
+    },
+    ("year", "2023"): {
+        "label": "2023",
+        "group": "Year",
+    },
+    ("year", "2024"): {
+        "label": "2024",
+        "group": "Year",
+    },
+    ("year", "2025"): {
+        "label": "2025",
+        "group": "Year",
+    },
+    ("year", "2026"): {
+        "label": "2026",
+        "group": "Year",
+    },
     ("all_available", "2017_present"): {
-        "label": "2017-present",
+        "label": "Overall",
         "group": "Overall",
     },
 }

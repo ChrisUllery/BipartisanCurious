@@ -454,6 +454,143 @@ def main():
         )
 
     # --------------------------------------------------------
+    # Calendar-year summaries
+    # --------------------------------------------------------
+
+    print("\nYEAR PERIODS")
+    print("------------")
+
+    years = sorted(
+        df["action_date_parsed"]
+        .dt.year
+        .unique()
+    )
+
+    for year in years:
+        subset = df[
+            df["action_date_parsed"].dt.year == year
+        ]
+
+        start_date = subset[
+            "action_date_parsed"
+        ].min()
+
+        end_date = subset[
+            "action_date_parsed"
+        ].max()
+
+        summary = summarize_period(
+            df=df,
+            period_type="year",
+            period_id=str(year),
+            period_label=str(year),
+            start_date=start_date,
+            end_date=end_date,
+            partial_period=(
+                end_date == LATEST_DATA_DATE
+            ),
+        )
+
+        outputs.append(summary)
+
+        print(
+            f"{year}: "
+            f"{start_date.date()} to "
+            f"{end_date.date()} | "
+            f"{len(summary):,} members"
+        )
+
+    # --------------------------------------------------------
+    # Congressional-session summaries
+    #
+    # Use the Clerk's Congress/session identity rather than
+    # inferring sessions from calendar dates.
+    # --------------------------------------------------------
+
+    print("\nCONGRESSIONAL SESSION PERIODS")
+    print("-----------------------------")
+
+    session_labels = {
+        "1st": "1st Session",
+        "2nd": "2nd Session",
+    }
+
+    for congress in CONGRESSES:
+        congress_subset = df[
+            df["congress"] == congress
+        ]
+
+        sessions = (
+            congress_subset["session"]
+            .dropna()
+            .astype(str)
+            .drop_duplicates()
+            .tolist()
+        )
+
+        session_order = {
+            "1st": 1,
+            "2nd": 2,
+        }
+
+        sessions = sorted(
+            sessions,
+            key=lambda value: (
+                session_order.get(value, 99),
+                value,
+            ),
+        )
+
+        for session in sessions:
+            subset = congress_subset[
+                congress_subset["session"].astype(str)
+                == session
+            ]
+
+            start_date = subset[
+                "action_date_parsed"
+            ].min()
+
+            end_date = subset[
+                "action_date_parsed"
+            ].max()
+
+            session_label = session_labels.get(
+                session,
+                f"{session} Session",
+            )
+
+            period_id = (
+                f"{congress}_{session}"
+            )
+
+            period_label = (
+                f"{congress}th Congress - "
+                f"{session_label}"
+            )
+
+            summary = summarize_period(
+                df=df,
+                period_type="congress_session",
+                period_id=period_id,
+                period_label=period_label,
+                start_date=start_date,
+                end_date=end_date,
+                partial_period=(
+                    end_date == LATEST_DATA_DATE
+                ),
+            )
+
+            outputs.append(summary)
+
+            print(
+                f"{period_label}: "
+                f"{start_date.date()} to "
+                f"{end_date.date()} | "
+                f"{len(summary):,} members"
+            )
+
+    # --------------------------------------------------------
     # Presidential summaries
     # --------------------------------------------------------
 
