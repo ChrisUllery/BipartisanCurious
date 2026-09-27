@@ -1,0 +1,35 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyCharm
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Raw downloaded data
+data/raw/clerk_xml/*
+data/raw/census/*
+
+# Generated/processed data
+data/processed/*
+data/diagnostics/*
+
+# Keep empty directory structure in Git
+!data/raw/clerk_xml/.gitkeep
+!data/raw/census/.gitkeep
+!data/processed/roll_calls/.gitkeep
+!data/processed/members/.gitkeep
+!data/processed/map/.gitkeep
+!data/diagnostics/.gitkeep
+
+# Temporary files
+*.tmp
+*.log
