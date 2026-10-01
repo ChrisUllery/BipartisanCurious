@@ -601,6 +601,84 @@
             outline: none;
         }
 
+
+        .alignment-legend {
+            width: 330px;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid #aaa;
+            border-radius: 3px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+            font-size: 11px;
+            line-height: 1.3;
+            color: #222;
+        }
+
+        .alignment-legend-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .alignment-legend-subtitle {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .alignment-legend-row {
+            display: grid;
+            grid-template-columns:
+                auto 1fr auto 1fr auto;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .alignment-gradient {
+            height: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.18);
+        }
+
+        .alignment-gradient.democratic {
+            background:
+                linear-gradient(
+                    to right,
+                    #083a90,
+                    #782b5a
+                );
+        }
+
+        .alignment-gradient.republican {
+            background:
+                linear-gradient(
+                    to right,
+                    #782b5a,
+                    #e81b23
+                );
+        }
+
+        .alignment-purple {
+            color: #782b5a;
+        }
+
+        .alignment-legend-labels {
+            display: flex;
+            justify-content: space-between;
+            margin:
+                3px 49px 0 49px;
+            font-size: 9px;
+            color: #666;
+        }
+
+        .alignment-legend-note {
+            margin-top: 7px;
+            padding-top: 6px;
+            border-top: 1px solid #ddd;
+            color: #555;
+        }
+
     </style>
 </head>
 
@@ -697,7 +775,9 @@
             selectedDistrictLayer !== layer
         ) {
             selectedDistrictLayer.setStyle(
-                districtStyle()
+                districtStyle(
+                    selectedDistrictLayer.feature
+                )
             );
         }
 
@@ -2410,12 +2490,165 @@
     }
 
 
-    function districtStyle() {
+    function mixHexColors(colorA, colorB, amount) {
+        const clamp = Math.max(0, Math.min(1, amount));
+
+        const a = colorA.replace("#", "");
+        const b = colorB.replace("#", "");
+
+        const ar = parseInt(a.slice(0, 2), 16);
+        const ag = parseInt(a.slice(2, 4), 16);
+        const ab = parseInt(a.slice(4, 6), 16);
+
+        const br = parseInt(b.slice(0, 2), 16);
+        const bg = parseInt(b.slice(2, 4), 16);
+        const bb = parseInt(b.slice(4, 6), 16);
+
+        const r = Math.round(ar + (br - ar) * clamp);
+        const g = Math.round(ag + (bg - ag) * clamp);
+        const blue = Math.round(ab + (bb - ab) * clamp);
+
+        return (
+            "#" +
+            [r, g, blue]
+                .map(value =>
+                    value.toString(16).padStart(2, "0")
+                )
+                .join("")
+        );
+    }
+
+
+    function districtFillColor(properties) {
+        const party = properties
+            ? properties.party
+            : null;
+
+        const oppositionRate =
+            properties &&
+            Number.isFinite(
+                Number(properties.party_opposition_rate)
+            )
+                ? Number(properties.party_opposition_rate)
+                : 0;
+
+        const republicanColor = "#e81b23";
+        const democraticColor = "#083a90";
+        const independentColor = "#782b5a";
+        const bipartisanColor = "#782b5a";
+
+        /*
+         * Map opposition rates from 0% to 45%.
+         *
+         * 0%   = party's base color
+         * 22.5% = halfway toward purple
+         * 45%+ = full purple
+         *
+         * This keeps the color proportional to how often
+         * the representative votes against their own
+         * party majority.
+         */
+        const blendAmount =
+            Math.min(oppositionRate / 0.45, 1);
+
+        if (party === "R") {
+            return mixHexColors(
+                republicanColor,
+                bipartisanColor,
+                blendAmount
+            );
+        }
+
+        if (party === "D") {
+            return mixHexColors(
+                democraticColor,
+                bipartisanColor,
+                blendAmount
+            );
+        }
+
+        if (party) {
+            return independentColor;
+        }
+
+        return "#d9d9d9";
+    }
+
+
+    function addAlignmentLegend() {
+        const AlignmentLegend = L.Control.extend({
+            options: {
+                position: "bottomleft"
+            },
+
+            onAdd: function () {
+                const container = L.DomUtil.create(
+                    "div",
+                    "alignment-legend"
+                );
+
+                container.innerHTML = `
+                    <div class="alignment-legend-title">
+                        119th Congress voting alignment
+                    </div>
+
+                    <div class="alignment-legend-subtitle">
+                        Share of qualifying votes cast against
+                        the member's own party majority
+                    </div>
+
+                    <div class="alignment-legend-row">
+                        <span>Democrat</span>
+
+                        <div class="alignment-gradient democratic">
+                        </div>
+
+                        <span class="alignment-purple">
+                            45%
+                        </span>
+
+                        <div class="alignment-gradient republican">
+                        </div>
+
+                        <span>Republican</span>
+                    </div>
+
+                    <div class="alignment-legend-labels">
+                        <span>0% against</span>
+                        <span>45% against</span>
+                        <span>0% against</span>
+                    </div>
+
+                    <div class="alignment-legend-note">
+                        Colors move toward purple as members vote
+                        against their own party majority more often.
+                    </div>
+                `;
+
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
+
+                return container;
+            }
+        });
+
+        map.addControl(
+            new AlignmentLegend()
+        );
+    }
+
+
+    function districtStyle(feature) {
+        const properties =
+            feature && feature.properties
+                ? feature.properties
+                : null;
+
         return {
             color: "#555",
             weight: 1,
             opacity: 1,
-            fillColor: "#d9d9d9",
+            fillColor: districtFillColor(properties),
             fillOpacity: 0.65
         };
     }
@@ -2503,6 +2736,8 @@
             addMemberSearchControl(
                 districtData
             );
+
+            addAlignmentLegend();
 
             // Keep the initial view centered on the United States.
             // Fitting all district geometry can zoom far out because
