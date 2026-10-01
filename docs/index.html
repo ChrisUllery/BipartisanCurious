@@ -635,11 +635,20 @@
                 min-height: 100%;
             }
 
+            .site-topbar {
+                height: 48px;
+                padding: 0 16px;
+            }
+
+            .site-brand {
+                font-size: 16px;
+            }
+
             #app {
                 grid-template-columns: 1fr;
                 grid-template-rows: 55vh auto auto;
                 height: auto;
-                min-height: calc(100vh - 56px);
+                min-height: calc(100vh - 48px);
             }
 
             #map {
@@ -652,18 +661,58 @@
                 left: 50%;
             }
 
-            #history-chart {
-                grid-column: 1;
-                grid-row: 2;
-                max-height: none;
+            .map-search-control {
+                width: min(
+                    280px,
+                    calc(100vw - 130px)
+                );
+            }
+
+            .map-search-input {
+                padding: 9px 10px;
+                font-size: 13px;
+            }
+
+            .alignment-legend {
+                width: min(
+                    290px,
+                    calc(100vw - 24px)
+                );
+                padding: 8px 10px;
+                font-size: 10px;
+            }
+
+            .alignment-legend-title {
+                font-size: 12px;
+            }
+
+            .alignment-legend-subtitle,
+            .alignment-legend-note {
+                display: none;
+            }
+
+            .alignment-legend-row {
+                font-size: 9px;
+            }
+
+            .alignment-legend-labels {
+                margin: 3px 40px 0;
+                font-size: 8px;
             }
 
             #panel {
                 grid-column: 1;
-                grid-row: 3;
+                grid-row: 2;
                 overflow-y: visible;
+                padding: 24px 20px;
                 border-left: 0;
                 border-top: 1px solid #ccc;
+            }
+
+            #history-chart {
+                grid-column: 1;
+                grid-row: 3;
+                max-height: none;
             }
 
             .history-header {
@@ -672,10 +721,14 @@
             }
 
             .history-row {
-                grid-template-columns: 82px minmax(90px, 1fr) 76px;
+                grid-template-columns:
+                    82px
+                    minmax(90px, 1fr)
+                    76px;
                 gap: 7px;
             }
         }
+
         .leaflet-interactive:focus {
             outline: none;
         }
