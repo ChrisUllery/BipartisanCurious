@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>119th Congress Overview | BipartisanCurious</title>
+
+    <style>
+        :root {
+            --bg: #f4f5f7;
+            --card: #ffffff;
+            --text: #1f2933;
+            --muted: #667085;
+            --border: #d9dee7;
+            --red: #880808;
+            --blue: #002db3;
+            --purple: #5a245f;
+            --gray: #6b7280;
+            --light-red: #f8e8e8;
+            --light-blue: #e8edf9;
+            --light-purple: #eee8f0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-inner {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .brand {
+            font-size: 21px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .nav {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .nav a {
+            color: #475467;
+            text-decoration: none;
+        }
+
+        .nav a:hover {
+            text-decoration: underline;
+        }
+
+        .nav .active {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        main {
+            width: min(1180px, calc(100% - 32px));
+            margin: 34px auto 60px;
+        }
+
+        .hero {
+            margin-bottom: 26px;
+        }
+
+        .eyebrow {
+            margin: 0 0 4px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(32px, 5vw, 48px);
+            line-height: 1.08;
+        }
+
+        .subtitle {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .summary {
+            max-width: 900px;
+            margin: 18px 0 0;
+            font-size: 17px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .headline-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin: 24px 0;
+        }
+
+        .party-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            margin-top: 5px;
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .stat-note {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        section {
+            margin-top: 34px;
+        }
+
+        h2 {
+            margin: 0 0 6px;
+            font-size: 25px;
+        }
+
+        .section-intro {
+            margin: 0 0 18px;
+            color: var(--muted);
+            max-width: 900px;
+        }
+
+        .composition {
+            display: flex;
+            width: 100%;
+            height: 32px;
+            overflow: hidden;
+            border-radius: 7px;
+            background: #ddd;
+            margin: 18px 0 12px;
+        }
+
+        .composition > div {
+            min-width: 2px;
+        }
+
+        .composition-r {
+            background: var(--red);
+        }
+
+        .composition-d {
+            background: var(--blue);
+        }
+
+        .composition-i {
+            background: var(--purple);
+        }
+
+        .composition-v {
+            background: #b9bec7;
+        }
+
+        .legend-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 22px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-r { background: var(--red); }
+        .dot-d { background: var(--blue); }
+        .dot-i { background: var(--purple); }
+        .dot-v { background: #b9bec7; }
+
+        .vote-bar {
+            display: flex;
+            width: 100%;
+            height: 34px;
+            overflow: hidden;
+            border-radius: 7px;
+            margin: 18px 0 12px;
+            background: #ddd;
+        }
+
+        .vote-opposed {
+            background: var(--purple);
+        }
+
+        .vote-same {
+            background: #98a2b3;
+        }
+
+        .vote-other {
+            background: #d0d5dd;
+        }
+
+        .party-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .party-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+        }
+
+        .party-card.r::before {
+            background: var(--red);
+        }
+
+        .party-card.d::before {
+            background: var(--blue);
+        }
+
+        .party-title {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .big-rate {
+            margin: 12px 0 2px;
+            font-size: 38px;
+            font-weight: 700;
+        }
+
+        .party-card.r .big-rate {
+            color: var(--red);
+        }
+
+        .party-card.d .big-rate {
+            color: var(--blue);
+        }
+
+        .comparison-callout {
+            margin-top: 16px;
+            background: var(--light-purple);
+            border: 1px solid #d9c9df;
+            border-radius: 10px;
+            padding: 16px 18px;
+            font-size: 16px;
+        }
+
+        .comparison-callout strong {
+            font-size: 18px;
+        }
+
+        .mini-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .mini-stat {
+            background: #f8f9fb;
+            border-radius: 8px;
+            padding: 11px 12px;
+        }
+
+        .mini-value {
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .mini-label {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .bands {
+            margin-top: 18px;
+        }
+
+        .band-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 92px;
+            gap: 10px;
+            align-items: center;
+            margin: 9px 0;
+            font-size: 13px;
+        }
+
+        .track {
+            height: 13px;
+            background: #e8eaee;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .fill {
+            height: 100%;
+            border-radius: inherit;
+        }
+
+        .r .fill {
+            background: var(--red);
+        }
+
+        .d .fill {
+            background: var(--blue);
+        }
+
+        .band-value {
+            text-align: right;
+            color: var(--muted);
+        }
+
+        .month-chart {
+            display: grid;
+            grid-template-columns: repeat(19, minmax(28px, 1fr));
+            align-items: end;
+            gap: 7px;
+            height: 250px;
+            padding-top: 20px;
+            overflow-x: auto;
+        }
+
+        .month {
+            min-width: 28px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .month-bars {
+            width: 100%;
+            max-width: 34px;
+            height: 185px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .month-opposed,
+        .month-same,
+        .month-other {
+            width: 100%;
+        }
+
+        .month-opposed {
+            background: var(--purple);
+        }
+
+        .month-same {
+            background: #98a2b3;
+        }
+
+        .month-other {
+            background: #d0d5dd;
+        }
+
+        .month-label {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 10px;
+            white-space: nowrap;
+            transform: rotate(-45deg);
+            transform-origin: center;
+        }
+
+        .month-tooltip {
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .history-period-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .presidential-overall-stat {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 14px 0;
+            margin-top: 10px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .presidential-overall-value {
+            font-size: 30px;
+            line-height: 1;
+            font-weight: 800;
+        }
+
+        .presidential-overall-label {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .presidential-member-count {
+            margin-top: 12px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+
+
+        .history-period-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .history-period-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .history-period-dates {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 14px;
+        }
+
+        .history-party-row {
+            display: grid;
+            grid-template-columns: 105px 90px 1fr;
+            gap: 10px;
+            align-items: center;
+            padding: 9px 0;
+            border-top: 1px solid #edf0f4;
+        }
+
+        .history-party-row:first-of-type {
+            border-top: 0;
+        }
+
+        .history-party-name {
+            font-weight: 700;
+        }
+
+        .history-party-rate {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .history-party-rate.r {
+            color: var(--red);
+        }
+
+        .history-party-rate.d {
+            color: var(--blue);
+        }
+
+        .history-coverage {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .history-caveat {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .definition-link {
+            color: inherit;
+            font-weight: 600;
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
+        }
+
+        .table-note {
+            margin: 14px 8px 2px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+
+
+        .congress-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .congress-table th,
+        .congress-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e5e8ed;
+            text-align: right;
+        }
+
+        .congress-table th:first-child,
+        .congress-table td:first-child {
+            text-align: left;
+        }
+
+        .congress-table th {
+            color: var(--muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .party-change-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .party-change-item {
+            padding: 14px;
+            background: #f8f9fb;
+            border-radius: 8px;
+        }
+
+        .party-change-name {
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .party-change-detail {
+            color: #475467;
+            font-size: 14px;
+        }
+
+        .overview-card {
+            padding-top: 22px;
+            padding-bottom: 22px;
+        }
+
+        .overview-coverage {
+            margin-top: 16px;
+            color: #475467;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .rate-explainer {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border: 1px solid #d8dce3;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #344054;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+
+
+        .overall-caveat {
+            margin-top: 12px;
+        }
+
+        .snapshot-banner {
+            border-top: 4px solid var(--purple);
+            padding-top: 22px;
+            margin-top: 18px;
+        }
+
+        .snapshot-banner h2 {
+            font-size: 30px;
+            margin-bottom: 6px;
+        }
+
+        .snapshot-copy {
+            max-width: 850px;
+            font-size: 15px;
+        }
+
+
+
+        .method {
+            color: #475467;
+            font-size: 14px;
+        }
+
+        .method p:last-child {
+            margin-bottom: 0;
+        }
+
+        .loading,
+        .error {
+            padding: 40px 0;
+            font-size: 18px;
+        }
+
+        .error {
+            color: #9b1c1c;
+        }
+
+        @media (max-width: 760px) {
+            .headline-grid,
+            .party-grid,
+            .history-period-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .congress-table {
+                font-size: 12px;
+            }
+
+            .topbar-inner {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 14px 0;
+                gap: 8px;
+            }
+
+            .band-row {
+                grid-template-columns: 85px 1fr 75px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="index.html">
+            BipartisanCurious
+        </a>
+
+        <nav class="nav">
+            <a href="index.html">District map</a>
+            <a class="active" href="congress.html">
+                Congress overview
+            </a>
+        </nav>
+    </div>
+</header>
+
+<main id="app">
+    <div class="loading">
+        Loading Congress overview...
+    </div>
+</main>
+
+<script>
+    const DATA_URL = "data/congress_119_overview.json";
+
+    function pct(value, digits = 1) {
+        if (value === null || value === undefined) {
+            return "?";
+        }
+
+        return (value * 100).toFixed(digits) + "%";
+    }
+
+    function num(value) {
+        return Number(value || 0).toLocaleString();
+    }
+
+    function dateLabel(value) {
+        if (!value) {
+            return "";
+        }
+
+        return new Date(
+            value + "T12:00:00"
+        ).toLocaleDateString(
+            "en-US",
+            {
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
+    }
+
+    function bandLabel(key) {
+        const labels = {
+            under_5: "Under 5%",
+            "5_to_under_10": "5&#8211;10%",
+            "10_to_under_20": "10&#8211;20%",
+            "20_to_under_30": "20&#8211;30%",
+            "30_to_under_45": "30&#8211;45%",
+            "45_or_more": "45%+"
+        };
+
+        return labels[key] || key;
+    }
+
+    function partyBandRows(stats, partyClass) {
+        return Object.entries(
+            stats.opposition_rate_bands
+        ).map(([key, band]) => {
+            const width = Math.max(
+                0,
+                Math.min(100, band.share * 100)
+            );
+
+            return `
+                <div class="band-row ${partyClass}">
+                    <div>${bandLabel(key)}</div>
+
+                    <div class="track">
+                        <div
+                            class="fill"
+                            style="width:${width}%"
+                        ></div>
+                    </div>
+
+                    <div class="band-value">
+                        ${num(band.count)}
+                        (${pct(band.share, 1)})
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function historicalPartyRow(
+        stats,
+        partyCode
+    ) {
+        const partyName =
+            partyCode === "R"
+                ? "Republicans"
+                : "Democrats";
+
+        const partyClass =
+            partyCode === "R"
+                ? "r"
+                : "d";
+
+        const excluded =
+            Number(
+                stats.excluded_party_change_rows || 0
+            )
+            +
+            Number(
+                stats.excluded_different_party_rows || 0
+            );
+
+        let caveat = "";
+
+        if (excluded > 0) {
+            caveat = `
+                <div class="history-caveat">
+                    ${num(excluded)}
+                    historical member record${excluded === 1 ? "" : "s"}
+                    excluded from this party statistic because
+                    affiliation differed or changed within the period.
+                </div>
+            `;
+        }
+
+        return `
+            <div class="history-party-row">
+                <div class="history-party-name">
+                    ${partyName}
+                </div>
+
+                <div
+                    class="history-party-rate ${partyClass}"
+                >
+                    ${pct(
+                        stats.average_member_opposition_rate,
+                        2
+                    )}
+                </div>
+
+                <div class="history-coverage">
+                    Coverage:
+                    ${num(stats.members_with_period_data)}
+                    of
+                    ${num(stats.current_members_today)}
+                    current members
+                    (${pct(stats.coverage_rate, 1)})
+                    <br>
+                    ${num(stats.statistic_contributors)}
+                    contribute to this party statistic
+                </div>
+            </div>
+
+            ${caveat}
+        `;
+    }
+
+
+    function historicalPeriodCard(period) {
+        return `
+            <div class="history-period-card">
+                <div class="history-period-title">
+                    ${period.period_label}
+                    ${period.partial_period ? " (partial)" : ""}
+                </div>
+
+                <div class="history-period-dates">
+                    ${dateLabel(period.period_start)}
+                    through
+                    ${dateLabel(period.period_end)}
+                </div>
+
+                ${historicalPartyRow(
+                    period.parties.R,
+                    "R"
+                )}
+
+                ${historicalPartyRow(
+                    period.parties.D,
+                    "D"
+                )}
+            </div>
+        `;
+    }
+
+
+    function congressHistoryRows(congresses) {
+        return Object.keys(congresses)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(key => {
+                const period = congresses[key];
+                const r = period.parties.R;
+                const d = period.parties.D;
+
+                return `
+                    <tr>
+                        <td>
+                            ${period.period_label}
+                            ${period.partial_period
+                                ? " (partial)"
+                                : ""}
+                        </td>
+
+                        <td>
+                            ${pct(
+                                r.average_member_opposition_rate,
+                                2
+                            )}
+                        </td>
+
+                        <td>
+                            ${num(r.members_with_period_data)}
+                            /
+                            ${num(r.current_members_today)}
+                            (${pct(r.coverage_rate, 1)})
+                        </td>
+
+                        <td>
+                            ${pct(
+                                d.average_member_opposition_rate,
+                                2
+                            )}
+                        </td>
+
+                        <td>
+                            ${num(d.members_with_period_data)}
+                            /
+                            ${num(d.current_members_today)}
+                            (${pct(d.coverage_rate, 1)})
+                        </td>
+                    </tr>
+                `;
+            })
+            .join("");
+    }
+
+
+    function formatDate(value) {
+        if (!value) {
+            return "";
+        }
+
+        const parts = String(value)
+            .split("-")
+            .map(Number);
+
+        if (parts.length !== 3) {
+            return value;
+        }
+
+        const [year, month, day] = parts;
+
+        const date = new Date(
+            year,
+            month - 1,
+            day
+        );
+
+        return date.toLocaleDateString(
+            "en-US",
+            {
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+            }
+        );
+    }
+
+
+    function presidentialAsExistedCard(period) {
+        const all = period.all_major_party_members;
+        const r = period.parties.R;
+        const d = period.parties.D;
+
+        return `
+            <div class="history-period-card">
+                <div class="history-period-title">
+                    ${period.period_label}
+                    ${period.partial_period ? " (partial)" : ""}
+                </div>
+
+                <div class="history-period-dates">
+                    ${dateLabel(period.period_start)}
+                    through
+                    ${dateLabel(period.period_end)}
+                </div>
+
+                <div class="presidential-overall-stat">
+                    <div class="presidential-overall-value">
+                        ${pct(
+                            all.average_member_opposition_rate,
+                            2
+                        )}
+                    </div>
+
+                    <div class="presidential-overall-label">
+                        of
+                        <a
+                            class="definition-link"
+                            href="#qualifying-votes"
+                        >qualifying votes</a>
+                        <br>
+                        Average across all major-party members
+                    </div>
+                </div>
+
+                <div class="history-party-row">
+                    <div class="history-party-name">
+                        Republicans
+                    </div>
+
+                    <div class="history-party-rate r">
+                        ${pct(
+                            r.average_member_opposition_rate,
+                            2
+                        )}
+                    </div>
+
+                    <div class="history-coverage">
+                        ${num(r.members)} members represented
+                    </div>
+                </div>
+
+                <div class="history-party-row">
+                    <div class="history-party-name">
+                        Democrats
+                    </div>
+
+                    <div class="history-party-rate d">
+                        ${pct(
+                            d.average_member_opposition_rate,
+                            2
+                        )}
+                    </div>
+
+                    <div class="history-coverage">
+                        ${num(d.members)} members represented
+                    </div>
+                </div>
+
+                <div class="presidential-member-count">
+                    Unique major-party members represented:
+                    <strong>
+                        ${num(period.unique_major_party_members)}
+                    </strong>
+                </div>
+            </div>
+        `;
+    }
+
+    function congressAsExistedRows(congresses) {
+        return Object.keys(congresses)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(key => {
+                const period = congresses[key];
+
+                const all =
+                    period.all_major_party_members;
+
+                const r = period.parties.R;
+                const d = period.parties.D;
+
+                return `
+                    <tr>
+                        <td>
+                            ${period.period_label}
+                            ${period.partial_period
+                                ? " (partial)"
+                                : ""}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${pct(
+                                    all.average_member_opposition_rate,
+                                    2
+                                )}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${pct(
+                                r.average_member_opposition_rate,
+                                2
+                            )}
+                        </td>
+
+                        <td>
+                            ${pct(
+                                d.average_member_opposition_rate,
+                                2
+                            )}
+                        </td>
+
+                        <td>
+                            ${num(
+                                period.unique_major_party_members
+                            )}
+                        </td>
+                    </tr>
+                `;
+            })
+            .join("");
+    }
+
+
+    function partyChangeHtml(changes) {
+        if (!changes || !changes.length) {
+            return `
+                <div class="party-change-item">
+                    No current members have multiple party
+                    affiliations represented in the available data.
+                </div>
+            `;
+        }
+
+        return changes.map(change => {
+            const evidence = (
+                change.evidence || []
+            )
+                .filter(row =>
+                    [
+                        "year",
+                        "congress_session",
+                        "congress"
+                    ].includes(row.period_type)
+                )
+                .map(row => `
+                    <div>
+                        ${row.period_label}:
+                        ${String(
+                            row.parties_during_period || ""
+                        ).replaceAll("|", " / ")}
+                    </div>
+                `)
+                .join("");
+
+            return `
+                <div class="party-change-item">
+                    <div class="party-change-name">
+                        ${change.name}
+                        (${change.state}-${change.district})
+                    </div>
+
+                    <div class="party-change-detail">
+                        Affiliations represented in
+                        2017-present voting data:
+                        <strong>
+                            ${String(
+                                change.parties_in_2017_present_data
+                                || ""
+                            ).replaceAll("|", " / ")}
+                        </strong>
+                        <br>
+                        Current affiliation:
+                        ${change.current_party}
+
+                        ${
+                            evidence
+                                ? `<div style="margin-top:6px">
+                                    ${evidence}
+                                   </div>`
+                                : ""
+                        }
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+
+    function monthChart(monthly) {
+        const rows = monthly;
+
+        const maxTotal = Math.max(
+            ...rows.map(
+                (row) => row.total
+            )
+        );
+
+        return rows.map((row) => {
+            const month = row.month;
+            const totalHeight =
+                (row.total / maxTotal) * 175;
+
+            const opposedHeight =
+                row.total
+                    ? totalHeight *
+                      (
+                          row.parties_opposed /
+                          row.total
+                      )
+                    : 0;
+
+            const sameHeight =
+                row.total
+                    ? totalHeight *
+                      (
+                          row.parties_same_side /
+                          row.total
+                      )
+                    : 0;
+
+            const otherHeight =
+                Math.max(
+                    0,
+                    totalHeight -
+                    opposedHeight -
+                    sameHeight
+                );
+
+            return `
+                <div
+                    class="month"
+                    title="${month}: ${row.total} roll calls; ${row.parties_opposed} opposed; ${row.parties_same_side} same side; ${row.other} other"
+                >
+                    <div class="month-tooltip">
+                        ${row.total}
+                    </div>
+
+                    <div class="month-bars">
+                        <div
+                            class="month-opposed"
+                            style="height:${opposedHeight}px"
+                        ></div>
+                        <div
+                            class="month-same"
+                            style="height:${sameHeight}px"
+                        ></div>
+                        <div
+                            class="month-other"
+                            style="height:${otherHeight}px"
+                        ></div>
+                    </div>
+
+                    <div class="month-label">
+                        ${month}
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function render(data) {
+        const app = document.getElementById("app");
+
+        const composition = data.current_house;
+        const rolls = data.roll_calls;
+        const r = data.member_statistics.R;
+        const d = data.member_statistics.D;
+
+        const history =
+            data.current_member_history;
+
+        const partyChanges =
+            data.current_party_changes || [];
+
+        const totalSeats = composition.total_seats;
+
+        const rWidth =
+            composition.parties.Republican / totalSeats * 100;
+
+        const dWidth =
+            composition.parties.Democratic / totalSeats * 100;
+
+        const iWidth =
+            composition.parties.Independent / totalSeats * 100;
+
+        const vacantWidth =
+            composition.vacant_seats / totalSeats * 100;
+
+        const opposedWidth =
+            rolls.parties_opposed /
+            rolls.total * 100;
+
+        const sameWidth =
+            rolls.parties_same_side /
+            rolls.total * 100;
+
+        const otherWidth =
+            rolls.other /
+            rolls.total * 100;
+
+        const averageDifference =
+            d.average_member_opposition_rate -
+            r.average_member_opposition_rate;
+
+        app.innerHTML = `
+            <div class="hero">
+                <p class="eyebrow">
+                    U.S. House of Representatives
+                </p>
+
+                <h1>Current House voting alignment</h1>
+
+                <p class="subtitle">
+                    Historical voting behavior of today's House
+                    membership from
+                    ${dateLabel(history.overall.period_start)}
+                    through
+                    ${dateLabel(history.overall.period_end)}
+                </p>
+
+                <p class="summary">
+                    This overview begins with the people serving
+                    in the House today and follows their available
+                    voting records back to 2017. It then compares
+                    those current-member results with all major-party
+                    members represented in our data during each
+                    presidential period and Congress.
+                </p>
+            </div>
+
+            <section>
+                <h2>
+                    Overall, 2017-present &#8212; current members
+                </h2>
+
+                <p class="section-intro">
+                    For each current member, BipartisanCurious
+                    calculates the share of qualifying Yea/Nay
+                    votes the member cast against that member's
+                    own party majority. The percentages below are
+                    the averages of those individual member rates.
+                </p>
+
+                <div class="grid party-grid">
+                    <div class="card party-card r overview-card">
+                        <h3 class="party-title">
+                            Republicans
+                        </h3>
+
+                        <div class="big-rate">
+                            ${pct(
+                                history.overall.parties.R
+                                    .average_member_opposition_rate,
+                                2
+                            )}
+                        </div>
+
+                        <div class="stat-note">
+                            Average share of qualifying votes cast against own party majority
+                        </div>
+
+                        <div class="overview-coverage">
+                            Coverage:
+                            <strong>
+                                ${num(
+                                    history.overall.parties.R
+                                        .members_with_period_data
+                                )}
+                                of
+                                ${num(
+                                    history.overall.parties.R
+                                        .current_members_today
+                                )}
+                            </strong>
+                            current Republicans
+                            (${pct(
+                                history.overall.parties.R
+                                    .coverage_rate,
+                                1
+                            )})
+
+                            <br>
+
+                            ${num(
+                                history.overall.parties.R
+                                    .statistic_contributors
+                            )}
+                            members contribute to this
+                            party statistic.
+                        </div>
+                    </div>
+
+                    <div class="card party-card d overview-card">
+                        <h3 class="party-title">
+                            Democrats
+                        </h3>
+
+                        <div class="big-rate">
+                            ${pct(
+                                history.overall.parties.D
+                                    .average_member_opposition_rate,
+                                2
+                            )}
+                        </div>
+
+                        <div class="stat-note">
+                            Average share of qualifying votes cast against own party majority
+                        </div>
+
+                        <div class="overview-coverage">
+                            Coverage:
+                            <strong>
+                                ${num(
+                                    history.overall.parties.D
+                                        .members_with_period_data
+                                )}
+                                of
+                                ${num(
+                                    history.overall.parties.D
+                                        .current_members_today
+                                )}
+                            </strong>
+                            current Democrats
+                            (${pct(
+                                history.overall.parties.D
+                                    .coverage_rate,
+                                1
+                            )})
+
+                            <br>
+
+                            ${num(
+                                history.overall.parties.D
+                                    .statistic_contributors
+                            )}
+                            members contribute to this
+                            party statistic.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rate-explainer">
+                    <strong>How to read these percentages:</strong>
+                    These are not shares of all House votes.
+                    A qualifying vote is one where the Republican
+                    and Democratic voting majorities took opposite
+                    Yea/Nay positions. A member's rate counts only
+                    qualifying Yea/Nay votes the member actually
+                    cast. Missed votes and Present votes are not
+                    included in the opposition-rate denominator.
+                </div>
+
+                <p class="history-caveat overall-caveat">
+                    Coverage and statistic contributors can differ.
+                    A current member may have voting records during
+                    a period but be excluded from a party statistic
+                    when the summarized period spans an affiliation
+                    change.
+                </p>
+            </section>
+
+
+<section>
+                <h2>Current House</h2>
+
+                <p class="section-intro">
+                    The current House membership used as the
+                    population for the current-member historical
+                    comparisons on this page.
+                </p>
+
+                <div class="card">
+                    <div class="composition">
+                        <div
+                            class="composition-r"
+                            style="width:${rWidth}%"
+                        ></div>
+                        <div
+                            class="composition-d"
+                            style="width:${dWidth}%"
+                        ></div>
+                        <div
+                            class="composition-i"
+                            style="width:${iWidth}%"
+                        ></div>
+                        <div
+                            class="composition-v"
+                            style="width:${vacantWidth}%"
+                        ></div>
+                    </div>
+
+                    <div class="legend-row">
+                        <div class="legend-item">
+                            <span class="dot dot-r"></span>
+                            ${num(composition.parties.Republican)}
+                            Republican
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="dot dot-d"></span>
+                            ${num(composition.parties.Democratic)}
+                            Democratic
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="dot dot-i"></span>
+                            ${num(composition.parties.Independent)}
+                            Independent
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="dot dot-v"></span>
+                            ${num(composition.vacant_seats)}
+                            vacant
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+<section>
+                <h2>
+                    By presidential period &#8212; current members
+                </h2>
+
+                <p class="section-intro">
+                    This section follows today's House members
+                    backward through time. Each percentage shows
+                    how often the average current member of that
+                    caucus voted against their own party on
+                    <a
+                        class="definition-link"
+                        href="#qualifying-votes"
+                    >qualifying votes</a>
+                    during the presidential period. Coverage shows
+                    how many members of today's caucus had qualifying
+                    voting records then.
+                </p>
+
+                <div class="history-period-grid">
+${historicalPeriodCard(
+                        history.presidential_periods.trump_1
+                    )}
+
+                    ${historicalPeriodCard(
+                        history.presidential_periods.biden
+                    )}
+
+                    ${historicalPeriodCard(
+                        history.presidential_periods.trump_2
+                    )}
+                </div>
+            </section>
+
+
+            <section>
+                <h2>
+                    By presidential period &#8212; members serving at the time
+                </h2>
+
+                <p class="section-intro">
+                    These cards use all major-party members represented
+                    in our data during each presidential period.
+                    The large percentage shows how often the average
+                    major-party member voted against their own party on
+                    <a
+                        class="definition-link"
+                        href="#qualifying-votes"
+                    >qualifying votes</a>.
+                    The Republican and Democratic rows show the
+                    party-specific averages. Party affiliation is
+                    evaluated at the time of each vote; Independent
+                    and other non-major-party periods are excluded.
+                </p>
+
+                <div class="history-period-grid">
+                    ${presidentialAsExistedCard(
+                        data.presidential_periods_as_it_existed
+                            .trump_1
+                    )}
+
+                    ${presidentialAsExistedCard(
+                        data.presidential_periods_as_it_existed
+                            .biden
+                    )}
+
+                    ${presidentialAsExistedCard(
+                        data.presidential_periods_as_it_existed
+                            .trump_2
+                    )}
+                </div>
+
+                <p class="history-caveat">
+                    Unique members represented can exceed 435
+                    because multiple people may occupy the same
+                    House seat during a presidential period.
+                    A member who changed between the Republican and
+                    Democratic parties is evaluated according to
+                    party affiliation at the time of each vote.
+                </p>
+            </section>
+
+<section>
+                <h2>
+                    By Congress &#8212; current members
+                </h2>
+
+                <p class="section-intro">
+                    This table follows today's House members backward
+                    through each Congress. Each percentage shows how
+                    often the average current member of that caucus
+                    voted against their own party on
+                    <a
+                        class="definition-link"
+                        href="#qualifying-votes"
+                    >qualifying votes</a>.
+                    Coverage shows how many members of today's caucus
+                    had qualifying voting records then.
+                </p>
+
+                <div class="card">
+                    <table class="congress-table">
+                        <thead>
+                            <tr>
+                                <th>Congress</th>
+                                <th>Republicans: against own party</th>
+                                <th>Republican coverage</th>
+                                <th>Democrats: against own party</th>
+                                <th>Democratic coverage</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            ${congressHistoryRows(
+                                history.congresses
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+
+            <section>
+                <h2>
+                    By Congress &#8212; members serving at the time
+                </h2>
+
+                <p class="section-intro">
+                    This table uses all major-party members represented
+                    in our data during each Congress. The overall
+                    percentage shows how often the average major-party
+                    member voted against their own party on
+                    <a
+                        class="definition-link"
+                        href="#qualifying-votes"
+                    >qualifying votes</a>.
+                    The Republican and Democratic columns show the
+                    party-specific averages. Party affiliation is
+                    evaluated at the time of each vote; Independent
+                    and other non-major-party periods are excluded.
+                </p>
+
+                <div class="card">
+                    <table class="congress-table">
+                        <thead>
+                            <tr>
+                                <th>Congress</th>
+
+                                <th>
+                                    All major-party members:
+                                    against own party
+                                </th>
+
+                                <th>
+                                    Republicans:
+                                    against own party
+                                </th>
+
+                                <th>
+                                    Democrats:
+                                    against own party
+                                </th>
+
+                                <th>
+                                    Unique members represented
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            ${congressAsExistedRows(
+                                data.congress_as_it_existed
+                            )}
+                        </tbody>
+                    </table>
+
+                    <p class="table-note">
+                        Unique members represented can exceed 435
+                        because multiple people may occupy the same
+                        House seat during a Congress. Members who
+                        changed between the Republican and Democratic
+                        parties are evaluated according to affiliation
+                        at the time of each vote. Independent and other
+                        non-major-party periods are not included in
+                        against-own-party rates.
+                    </p>
+                </div>
+            </section>
+
+<section>
+                <h2>
+                    Party affiliations represented in our data
+                </h2>
+
+                <p class="section-intro">
+                    Current House members whose voting records
+                    since 2017 contain more than one party
+                    affiliation. These labels describe what is
+                    present in the BipartisanCurious voting data;
+                    they do not claim an exact date of an
+                    affiliation change unless the data itself
+                    establishes one.
+                </p>
+
+                <div class="card">
+                    <div class="party-change-list">
+                        ${partyChangeHtml(partyChanges)}
+                    </div>
+                </div>
+            </section>
+
+<section>
+                <div class="snapshot-banner">
+                    <p class="eyebrow">
+                        Current Congress
+                    </p>
+
+                    <h2>119th Congress snapshot</h2>
+
+                    <p class="section-intro snapshot-copy">
+                        The following sections describe only
+                        voting during the 119th Congress, from
+                        ${dateLabel(data.metadata.first_vote_date)}
+                        through
+                        ${dateLabel(data.metadata.last_vote_date)}.
+                    </p>
+                </div>
+
+                <div class="grid headline-grid">
+                    <div class="card">
+                        <div class="stat-label">
+                            Roll calls
+                        </div>
+
+                        <div class="stat-value">
+                            ${num(rolls.total)}
+                        </div>
+
+                        <div class="stat-note">
+                            House roll calls in the 119th Congress
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">
+                            Parties opposed
+                        </div>
+
+                        <div class="stat-value">
+                            ${num(rolls.parties_opposed)}
+                        </div>
+
+                        <div class="stat-note">
+                            ${pct(
+                                rolls.parties_opposed_rate,
+                                1
+                            )}
+                            of 119th Congress roll calls
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="stat-label">
+                            Parties same side
+                        </div>
+
+                        <div class="stat-value">
+                            ${num(rolls.parties_same_side)}
+                        </div>
+
+                        <div class="stat-note">
+                            ${pct(
+                                rolls.parties_same_side /
+                                rolls.total,
+                                1
+                            )}
+                            of 119th Congress roll calls
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+<section>
+                <h2>How often were the parties opposed in the 119th Congress?</h2>
+
+                <p class="section-intro">
+                    A party-opposed roll call is one where
+                    Republican and Democratic voting majorities
+                    took opposite Yea/Nay positions.
+                </p>
+
+                <div class="card">
+                    <div class="vote-bar">
+                        <div
+                            class="vote-opposed"
+                            style="width:${opposedWidth}%"
+                        ></div>
+                        <div
+                            class="vote-same"
+                            style="width:${sameWidth}%"
+                        ></div>
+                        <div
+                            class="vote-other"
+                            style="width:${otherWidth}%"
+                        ></div>
+                    </div>
+
+                    <div class="legend-row">
+                        <div class="legend-item">
+                            <span class="dot dot-i"></span>
+                            ${num(rolls.parties_opposed)}
+                            opposed
+                        </div>
+
+                        <div class="legend-item">
+                            <span
+                                class="dot"
+                                style="background:#98a2b3"
+                            ></span>
+                            ${num(rolls.parties_same_side)}
+                            same side
+                        </div>
+
+                        <div class="legend-item">
+                            <span
+                                class="dot"
+                                style="background:#d0d5dd"
+                            ></span>
+                            ${num(rolls.other)}
+                            other
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+<section>
+                <h2>119th Congress member voting alignment</h2>
+
+                <p class="section-intro">
+                    These figures use only the 119th Congress.
+                    For each current Republican or Democratic
+                    member, the rate is the share of qualifying
+                    Yea/Nay votes cast against that member's own
+                    party majority. The large percentage is the
+                    average of those individual member rates.
+                </p>
+
+                <div class="grid party-grid">
+                    <div class="card party-card r">
+                        <h3 class="party-title">
+                            Republicans
+                        </h3>
+
+                        <div class="big-rate">
+                            ${pct(
+                                r.average_member_opposition_rate,
+                                2
+                            )}
+                        </div>
+
+                        <div class="stat-note">
+                            Average share of qualifying votes cast against own party majority
+                        </div>
+
+                        <div class="mini-stats">
+                            <div class="mini-stat">
+                                <div class="mini-value">
+                                    ${pct(
+                                        r.median_member_opposition_rate,
+                                        2
+                                    )}
+                                </div>
+                                <div class="mini-label">
+                                    Median member
+                                </div>
+                            </div>
+
+                            <div class="mini-stat">
+                                <div class="mini-value">
+                                    ${pct(
+                                        r.aggregate_opposition_rate,
+                                        2
+                                    )}
+                                </div>
+                                <div class="mini-label">
+                                    Aggregate rate
+                                </div>
+                            </div>
+
+                            <div class="mini-stat">
+                                <div class="mini-value">
+                                    ${num(r.against_party)}
+                                </div>
+                                <div class="mini-label">
+                                    Against-party votes
+                                </div>
+                            </div>
+
+                            <div class="mini-stat">
+                                <div class="mini-value">
+                                    ${pct(
+                                        r.aggregate_participation_rate,
+                                        2
+                                    )}
+                                </div>
+                                <div class="mini-label">
+                                    Participation
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bands">
+                            <strong>
+                                Member opposition-rate distribution
+                            </strong>
+                            ${partyBandRows(r, "r")}
+                        </div>
+                    </div>
+
+                    <div class="card party-card d">
+                        <h3 class="party-title">
+                            Democrats
+                        </h3>
+
+                        <div class="big-rate">
+                            ${pct(
+                                d.average_member_opposition_rate,
+                                2
+                            )}
+                        </div>
+
+                        <div class="stat-note">
+                            Average share of qualifying votes cast against own party majority
+                        </div>
+
+                        <div class="mini-stats">
+                            <div class="mini-stat">
+                                <div class="mini-value">
+                                    ${pct(
+                                        d.median_member_opposition_rate,
+                                        2
+                                    )}
+                                </div>
+                                <div class="mini-label">
+                                    Median member
+                                </div>
+                            </div>
+
+                            <div class="mini-stat">
+                                <div class="mini-value">
+                                    ${pct(
+                                        d.aggregate_opposition_rate,
+                                        2
+                                    )}
+                                </div>
+                                <div class="mini-label">
+                                    Aggregate rate
+                                </div>
+                            </div>
+
+                            <div class="mini-stat">
+                                <div class="mini-value">
+                                    ${num(d.against_party)}
+                                </div>
+                                <div class="mini-label">
+                                    Against-party votes
+                                </div>
+                            </div>
+
+                            <div class="mini-stat">
+                                <div class="mini-value">
+                                    ${pct(
+                                        d.aggregate_participation_rate,
+                                        2
+                                    )}
+                                </div>
+                                <div class="mini-label">
+                                    Participation
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bands">
+                            <strong>
+                                Member opposition-rate distribution
+                            </strong>
+                            ${partyBandRows(d, "d")}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-callout">
+                    The average current Democratic member voted
+                    against the Democratic majority on
+                    <strong>${pct(
+                        d.average_member_opposition_rate,
+                        2
+                    )}</strong>
+                    of qualifying votes cast, compared with
+                    <strong>${pct(
+                        r.average_member_opposition_rate,
+                        2
+                    )}</strong>
+                    for the average current Republican member &#8212;
+                    a difference of
+                    <strong>${(
+                        averageDifference * 100
+                    ).toFixed(2)} percentage points</strong>.
+                </div>
+            </section>
+
+
+
+<section>
+                <h2>How these numbers work</h2>
+
+                <div class="card method">
+                    <p id="qualifying-votes">
+                        <strong>Qualifying vote:</strong>
+                        a House roll call where the Republican
+                        and Democratic voting majorities took
+                        opposite Yea/Nay positions.
+                    </p>
+
+                    <p>
+                        <strong>Against own party:</strong>
+                        a member casts a Yea or Nay that is
+                        opposite the Yea/Nay position taken by
+                        that member's own party majority.
+                    </p>
+
+                    <p>
+                        <strong>Member opposition rate:</strong>
+                        against-party qualifying Yea/Nay votes
+                        divided by all qualifying Yea/Nay votes
+                        actually cast by that member. Present and
+                        Not Voting do not count in this denominator.
+                    </p>
+
+                    <p>
+                        <strong>Average member rate:</strong>
+                        the page calculates that opposition rate
+                        separately for every included member and
+                        then takes the average of the member rates.
+                        It is therefore not the percentage of all
+                        House votes that crossed party lines.
+                    </p>
+
+                    <p>
+                        <strong>Current-member historical comparisons:</strong>
+                        these sections follow people serving in the
+                        House today backward through periods in which
+                        they served and had qualifying voting records.
+                    </p>
+
+                    <p>
+                        <strong>Members serving at the time:</strong>
+                        these sections use all major-party members
+                        represented in our data during that period.
+                        Party affiliation is evaluated at the time of
+                        each vote. Independent and other non-major-party
+                        periods are excluded from against-own-party
+                        rates.
+                    </p>
+
+                    <p>
+                        Historical current-member statistics cover
+                        records from
+                        ${dateLabel(history.overall.period_start)}
+                        through
+                        ${dateLabel(history.overall.period_end)}.
+                        The 119th Congress snapshot covers
+                        ${dateLabel(data.metadata.first_vote_date)}
+                        through
+                        ${dateLabel(data.metadata.last_vote_date)}.
+                    </p>
+                </div>
+            </section>
+        `;
+    }
+
+    fetch(DATA_URL)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+            }
+
+            return response.json();
+        })
+        .then(render)
+        .catch(error => {
+            console.error(error);
+
+            document.getElementById("app").innerHTML = `
+                <div class="error">
+                    <strong>Could not render the Congress overview.</strong>
+                    <br><br>
+                    ${error.message}
+                    <br><br>
+                    Check the browser console for details.
+                </div>
+            `;
+        });
+</script>
+</body>
+</html>
