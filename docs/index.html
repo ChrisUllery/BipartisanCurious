@@ -19,11 +19,74 @@
             font-family: Arial, sans-serif;
         }
 
+        .site-topbar {
+            height: 56px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 0 22px;
+            border-bottom: 1px solid #ccc;
+            background: white;
+        }
+
+        .site-brand {
+            color: #111;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
         #app {
+            position: relative;
             display: grid;
             grid-template-columns: minmax(0, 1fr) 360px;
             grid-template-rows: minmax(0, 1fr) auto;
-            height: 100%;
+            height: calc(100% - 56px);
+        }
+
+        .map-view-nav {
+            position: absolute;
+            top: 12px;
+            left: calc((100% - 360px) / 2);
+            transform: translateX(-50%);
+            z-index: 1200;
+
+            display: flex;
+            align-items: stretch;
+
+            overflow: hidden;
+            border: 1px solid #999;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+
+            font-size: 13px;
+        }
+
+        .map-view-nav a {
+            display: block;
+            padding: 9px 12px;
+            color: #444;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .map-view-nav a + a {
+            border-left: 1px solid #ddd;
+        }
+
+        .map-view-nav a:hover,
+        .map-view-nav a:focus {
+            background: #f2f2f2;
+            text-decoration: underline;
+        }
+
+        .map-view-nav a.active {
+            background: #f7f7f7;
+            color: #111;
+            font-weight: 700;
         }
 
         #map {
@@ -58,6 +121,17 @@
         #panel .intro {
             line-height: 1.5;
             color: #444;
+        }
+
+        .overview-prompt {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid #ddd;
+        }
+
+        .overview-prompt a {
+            color: #222;
+            font-weight: 700;
         }
 
         .member-name {
@@ -565,12 +639,17 @@
                 grid-template-columns: 1fr;
                 grid-template-rows: 55vh auto auto;
                 height: auto;
-                min-height: 100vh;
+                min-height: calc(100vh - 56px);
             }
 
             #map {
                 grid-column: 1;
                 grid-row: 1;
+            }
+
+            .map-view-nav {
+                top: 10px;
+                left: 50%;
             }
 
             #history-chart {
@@ -684,8 +763,28 @@
 
 <body>
 
+<header class="site-topbar">
+    <a class="site-brand" href="index.html">
+        BipartisanCurious
+    </a>
+
+</header>
+
 <div id="app">
     <div id="map"></div>
+
+    <nav
+        class="map-view-nav"
+        aria-label="BipartisanCurious views"
+    >
+        <a class="active" href="index.html">
+            District map
+        </a>
+
+        <a href="congress.html">
+            Congress overview
+        </a>
+    </nav>
 
     <section id="history-chart">
         <div class="history-empty">
@@ -696,12 +795,33 @@
 
     <aside id="panel">
         <h1>BipartisanCurious</h1>
-        <p class="subtitle">119th Congress</p>
+        <p class="subtitle">U.S. House voting alignment</p>
 
         <p class="intro">
-            Select a congressional district to examine how its
-            representative voted when the Republican and Democratic
-            majorities took opposing positions.
+            Explore how members of the U.S. House vote when the
+            Republican and Democratic voting majorities take
+            opposite positions.
+        </p>
+
+        <p class="intro">
+            The map shows current 119th Congress districts.
+            District colors move toward purple as a representative
+            votes against their own party majority more often on
+            those qualifying votes.
+        </p>
+
+        <p class="intro">
+            Select a district to see the representative's voting
+            record, including available historical records back
+            to 2017.
+        </p>
+
+        <p class="intro overview-prompt">
+            <strong>Looking for the national picture?</strong><br>
+            Use
+            <a href="congress.html">Congress overview</a>
+            above to compare party and House-wide voting patterns
+            over time.
         </p>
     </aside>
 </div>
