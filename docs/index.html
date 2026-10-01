@@ -597,6 +597,10 @@
                 gap: 7px;
             }
         }
+        .leaflet-interactive:focus {
+            outline: none;
+        }
+
     </style>
 </head>
 
@@ -684,6 +688,34 @@
     let selectedHistoryView = "congress";
     let districtGeoJsonLayer = null;
     const districtLayerByBioguide = new Map();
+    let selectedDistrictLayer = null;
+
+
+    function highlightDistrictLayer(layer) {
+        if (
+            selectedDistrictLayer &&
+            selectedDistrictLayer !== layer
+        ) {
+            selectedDistrictLayer.setStyle(
+                districtStyle()
+            );
+        }
+
+        selectedDistrictLayer = layer;
+
+        if (selectedDistrictLayer) {
+            selectedDistrictLayer.setStyle({
+                weight: 3
+            });
+
+            if (
+                typeof selectedDistrictLayer.bringToFront ===
+                "function"
+            ) {
+                selectedDistrictLayer.bringToFront();
+            }
+        }
+    }
 
 
     function normalizeSearchText(value) {
@@ -2135,9 +2167,7 @@
                 );
             }
 
-            layer.setStyle({
-                weight: 3
-            });
+            highlightDistrictLayer(layer);
 
             if (typeof layer.openTooltip === "function") {
                 layer.openTooltip();
@@ -2462,10 +2492,7 @@
 
                         layer.on("click", () => {
                             showDistrict(properties);
-
-                            layer.setStyle({
-                                weight: 3
-                            });
+                            highlightDistrictLayer(layer);
                         });
                     }
                 }
