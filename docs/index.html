@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -229,7 +229,8 @@
             color: #666;
         }
 
-        .detail-control select {
+        .detail-control select,
+        .detail-control input {
             box-sizing: border-box;
             width: 100%;
             padding: 9px 10px;
@@ -238,6 +239,98 @@
             background: white;
             font: inherit;
             color: #222;
+        }
+
+        .detail-search-help {
+            margin-top: 5px;
+            font-size: 11px;
+            line-height: 1.35;
+            color: #777;
+        }
+
+        .map-search-control {
+            position: relative;
+            width: min(420px, calc(100vw - 110px));
+            font-family: Arial, sans-serif;
+        }
+
+        .map-search-input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 11px 13px;
+            border: 1px solid #888;
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28);
+            font-size: 14px;
+            line-height: 1.2;
+            color: #222;
+        }
+
+        .map-search-input:focus {
+            outline: 2px solid #555;
+            outline-offset: 1px;
+        }
+
+        .map-search-results {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+        }
+
+        .map-search-results.visible {
+            display: block;
+        }
+
+        .map-search-result {
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px 12px;
+            border: 0;
+            border-bottom: 1px solid #e3e3e3;
+            background: white;
+            font: inherit;
+            text-align: left;
+            color: #222;
+            cursor: pointer;
+        }
+
+        .map-search-result:last-child {
+            border-bottom: 0;
+        }
+
+        .map-search-result:hover,
+        .map-search-result:focus {
+            background: #f2f2f2;
+            outline: none;
+        }
+
+        .map-search-result-name {
+            display: block;
+            font-weight: bold;
+        }
+
+        .map-search-result-meta {
+            display: block;
+            margin-top: 2px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .map-search-empty {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #666;
         }
 
         .detail-total {
@@ -589,6 +682,52 @@
     let selectedPeriodKey = "all_available:2017_present";
     let selectedDistrictProperties = null;
     let selectedHistoryView = "congress";
+    let districtGeoJsonLayer = null;
+    const districtLayerByBioguide = new Map();
+
+
+    function normalizeSearchText(value) {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/&/g, " and ")
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim()
+            .replace(/\s+/g, " ");
+    }
+
+
+    function compactSearchText(value) {
+        return normalizeSearchText(value).replace(/\s+/g, "");
+    }
+
+
+    function searchTextMatches(haystack, query) {
+        const normalizedQuery = normalizeSearchText(query);
+
+        if (!normalizedQuery) {
+            return true;
+        }
+
+        const normalizedHaystack =
+            normalizeSearchText(haystack);
+
+        if (normalizedHaystack.includes(normalizedQuery)) {
+            return true;
+        }
+
+        const compactQuery =
+            compactSearchText(query);
+
+        const compactHaystack =
+            compactSearchText(haystack);
+
+        return (
+            compactQuery.length > 0 &&
+            compactHaystack.includes(compactQuery)
+        );
+    }
 
 
     function formatDate(dateString) {
@@ -1161,6 +1300,7 @@
         properties: null,
         category: "against_own_party_majority",
         congress: "all",
+        query: "",
         visible: DETAIL_PAGE_SIZE
     };
 
@@ -1282,7 +1422,30 @@
             );
         }
 
-        return votes;
+        const query =
+            normalizeSearchText(detailState.query);
+
+        if (!query) {
+            return votes;
+        }
+
+        return votes.filter(vote => {
+            const searchableText = [
+                vote.legislation_number,
+                vote.vote_question,
+                vote.vote_description,
+                vote.congress,
+                vote.roll_number,
+                vote.date
+            ]
+                .filter(Boolean)
+                .join(" ");
+
+            return searchTextMatches(
+                searchableText,
+                detailState.query
+            );
+        });
     }
 
 
@@ -1390,6 +1553,16 @@
     }
 
 
+    function escapeHtml(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
     function renderMemberDetail() {
         const panel =
             document.getElementById("panel");
@@ -1451,8 +1624,13 @@
         } else {
             recordsHtml = `
                 <div class="detail-status">
-                    No votes are available for this
-                    category and Congress.
+                    ${
+                        detailState.query
+                            ? `No votes matching "<strong>${escapeHtml(
+                                detailState.query
+                            )}</strong>" were found in this category and Congress.`
+                            : `No votes are available for this category and Congress.`
+                    }
                 </div>
             `;
         }
@@ -1530,6 +1708,24 @@
                         ${detailCongressOptions()}
                     </select>
                 </div>
+
+                <div class="detail-control">
+                    <label for="detail-search-input">
+                        SEARCH THESE VOTES
+                    </label>
+
+                    <input
+                        id="detail-search-input"
+                        type="search"
+                        value="${escapeHtml(detailState.query)}"
+                        placeholder="Bill number, title, subject or keyword"
+                        autocomplete="off"
+                    >
+
+                    <div class="detail-search-help">
+                        Search ignores capitalization and punctuation.
+                    </div>
+                </div>
             </div>
 
             <p class="detail-total">
@@ -1604,6 +1800,43 @@
                 }
             );
 
+        const detailSearchInput =
+            document.getElementById(
+                "detail-search-input"
+            );
+
+        if (detailSearchInput) {
+            detailSearchInput.addEventListener(
+                "input",
+                event => {
+                    detailState.query =
+                        event.target.value;
+
+                    detailState.visible =
+                        DETAIL_PAGE_SIZE;
+
+                    renderMemberDetail();
+
+                    const refreshedInput =
+                        document.getElementById(
+                            "detail-search-input"
+                        );
+
+                    if (refreshedInput) {
+                        refreshedInput.focus();
+
+                        const end =
+                            refreshedInput.value.length;
+
+                        refreshedInput.setSelectionRange(
+                            end,
+                            end
+                        );
+                    }
+                }
+            );
+        }
+
         const moreButton =
             document.getElementById(
                 "member-detail-more"
@@ -1665,6 +1898,7 @@
                 category:
                     "against_own_party_majority",
                 congress: "all",
+                query: "",
                 visible: DETAIL_PAGE_SIZE
             };
 
@@ -1848,6 +2082,304 @@
     }
 
 
+    function memberSearchText(properties) {
+        return [
+            properties.official_name,
+            properties.state,
+            properties.district,
+            districtLabel(properties),
+            `${properties.state} ${properties.district}`,
+            `${properties.state}${properties.district}`,
+            partyName(properties.party),
+            properties.party
+        ]
+            .filter(
+                value =>
+                    value !== null &&
+                    value !== undefined &&
+                    value !== ""
+            )
+            .join(" ");
+    }
+
+
+    function selectMemberFromSearch(properties) {
+        if (!properties) {
+            return;
+        }
+
+        showDistrict(properties);
+
+        const layer =
+            properties.bioguide_id
+                ? districtLayerByBioguide.get(
+                    properties.bioguide_id
+                )
+                : null;
+
+        if (layer) {
+            if (typeof layer.getBounds === "function") {
+                map.fitBounds(
+                    layer.getBounds(),
+                    {
+                        padding: [40, 40],
+                        maxZoom: 8
+                    }
+                );
+            } else if (
+                typeof layer.getLatLng === "function"
+            ) {
+                map.setView(
+                    layer.getLatLng(),
+                    8
+                );
+            }
+
+            layer.setStyle({
+                weight: 3
+            });
+
+            if (typeof layer.openTooltip === "function") {
+                layer.openTooltip();
+            }
+        }
+    }
+
+
+    function addMemberSearchControl(districtData) {
+        const searchableMembers =
+            districtData.features
+                .map(feature => feature.properties)
+                .filter(properties =>
+                    properties.bioguide_id &&
+                    properties.official_name
+                )
+                .sort((a, b) =>
+                    String(a.official_name).localeCompare(
+                        String(b.official_name)
+                    )
+                );
+
+        const SearchControl =
+            L.Control.extend({
+                options: {
+                    position: "topleft"
+                },
+
+                onAdd: function () {
+                    const container =
+                        L.DomUtil.create(
+                            "div",
+                            "map-search-control"
+                        );
+
+                    container.innerHTML = `
+                        <input
+                            class="map-search-input"
+                            type="search"
+                            placeholder="Search representative or district"
+                            aria-label="Search representative or district"
+                            autocomplete="off"
+                        >
+                        <div
+                            class="map-search-results"
+                            role="listbox"
+                        ></div>
+                    `;
+
+                    L.DomEvent.disableClickPropagation(
+                        container
+                    );
+
+                    L.DomEvent.disableScrollPropagation(
+                        container
+                    );
+
+                    const input =
+                        container.querySelector(
+                            ".map-search-input"
+                        );
+
+                    const results =
+                        container.querySelector(
+                            ".map-search-results"
+                        );
+
+                    function hideResults() {
+                        results.classList.remove(
+                            "visible"
+                        );
+                    }
+
+                    function choose(properties) {
+                        input.value =
+                            properties.official_name;
+
+                        hideResults();
+
+                        input.blur();
+
+                        selectMemberFromSearch(
+                            properties
+                        );
+                    }
+
+                    function renderResults() {
+                        const query =
+                            input.value.trim();
+
+                        if (!query) {
+                            results.innerHTML = "";
+                            hideResults();
+                            return;
+                        }
+
+                        const matches =
+                            searchableMembers
+                                .filter(properties =>
+                                    searchTextMatches(
+                                        memberSearchText(
+                                            properties
+                                        ),
+                                        query
+                                    )
+                                )
+                                .slice(0, 10);
+
+                        if (!matches.length) {
+                            results.innerHTML = `
+                                <div class="map-search-empty">
+                                    No representatives found.
+                                </div>
+                            `;
+
+                            results.classList.add(
+                                "visible"
+                            );
+
+                            return;
+                        }
+
+                        results.innerHTML =
+                            matches.map(
+                                (properties, index) => `
+                                    <button
+                                        class="map-search-result"
+                                        type="button"
+                                        data-search-index="${index}"
+                                        role="option"
+                                    >
+                                        <span class="map-search-result-name">
+                                            ${escapeHtml(
+                                                properties.official_name
+                                            )}
+                                        </span>
+                                        <span class="map-search-result-meta">
+                                            ${escapeHtml(
+                                                partyName(
+                                                    properties.party
+                                                )
+                                            )}
+                                            &bull;
+                                            ${escapeHtml(
+                                                districtLabel(
+                                                    properties
+                                                )
+                                            )}
+                                        </span>
+                                    </button>
+                                `
+                            ).join("");
+
+                        results.classList.add(
+                            "visible"
+                        );
+
+                        results
+                            .querySelectorAll(
+                                ".map-search-result"
+                            )
+                            .forEach(button => {
+                                button.addEventListener(
+                                    "click",
+                                    () => {
+                                        const index =
+                                            Number(
+                                                button.dataset.searchIndex
+                                            );
+
+                                        choose(
+                                            matches[index]
+                                        );
+                                    }
+                                );
+                            });
+                    }
+
+                    input.addEventListener(
+                        "input",
+                        renderResults
+                    );
+
+                    input.addEventListener(
+                        "keydown",
+                        event => {
+                            if (event.key === "Escape") {
+                                hideResults();
+                                input.blur();
+                                return;
+                            }
+
+                            if (event.key === "Enter") {
+                                const query =
+                                    input.value.trim();
+
+                                if (!query) {
+                                    return;
+                                }
+
+                                const match =
+                                    searchableMembers.find(
+                                        properties =>
+                                            searchTextMatches(
+                                                memberSearchText(
+                                                    properties
+                                                ),
+                                                query
+                                            )
+                                    );
+
+                                if (match) {
+                                    event.preventDefault();
+                                    choose(match);
+                                }
+                            }
+                        }
+                    );
+
+                    document.addEventListener(
+                        "click",
+                        event => {
+                            if (
+                                !container.contains(
+                                    event.target
+                                )
+                            ) {
+                                hideResults();
+                            }
+                        }
+                    );
+
+                    return container;
+                }
+            });
+
+        map.addControl(
+            new SearchControl()
+        );
+    }
+
+
     function districtStyle() {
         return {
             color: "#555",
@@ -1921,6 +2453,13 @@
                             }
                         );
 
+                        if (properties.bioguide_id) {
+                            districtLayerByBioguide.set(
+                                properties.bioguide_id,
+                                layer
+                            );
+                        }
+
                         layer.on("click", () => {
                             showDistrict(properties);
 
@@ -1932,11 +2471,18 @@
                 }
             ).addTo(map);
 
-            map.fitBounds(
-                districts.getBounds(),
-                {
-                    padding: [10, 10]
-                }
+            districtGeoJsonLayer = districts;
+
+            addMemberSearchControl(
+                districtData
+            );
+
+            // Keep the initial view centered on the United States.
+            // Fitting all district geometry can zoom far out because
+            // Alaska/Aleutian geometry crosses the antimeridian.
+            map.setView(
+                [38.5, -96],
+                4
             );
         })
         .catch(error => {
