@@ -596,6 +596,7 @@
             padding-bottom: 22px;
         }
 
+
         .overview-coverage {
             margin-top: 16px;
             color: #475467;
@@ -976,24 +977,7 @@
                     ${dateLabel(period.period_end)}
                 </div>
 
-                <div class="presidential-overall-stat">
-                    <div class="presidential-overall-value">
-                        ${pct(
-                            all.average_member_opposition_rate,
-                            2
-                        )}
-                    </div>
 
-                    <div class="presidential-overall-label">
-                        of
-                        <a
-                            class="definition-link"
-                            href="#qualifying-votes"
-                        >qualifying votes</a>
-                        <br>
-                        Average across all major-party members
-                    </div>
-                </div>
 
                 <div class="history-party-row">
                     <div class="history-party-name">
@@ -1318,7 +1302,7 @@
                 <div class="grid party-grid">
                     <div class="card party-card r overview-card">
                         <h3 class="party-title">
-                            Republicans
+                            Republicans voted with Democrats on average:
                         </h3>
 
                         <div class="big-rate">
@@ -1327,10 +1311,6 @@
                                     .average_member_opposition_rate,
                                 2
                             )}
-                        </div>
-
-                        <div class="stat-note">
-                            Average share of qualifying votes cast against own party majority
                         </div>
 
                         <div class="overview-coverage">
@@ -1366,7 +1346,7 @@
 
                     <div class="card party-card d overview-card">
                         <h3 class="party-title">
-                            Democrats
+                            Democrats voted with Republicans on average:
                         </h3>
 
                         <div class="big-rate">
@@ -1375,10 +1355,6 @@
                                     .average_member_opposition_rate,
                                 2
                             )}
-                        </div>
-
-                        <div class="stat-note">
-                            Average share of qualifying votes cast against own party majority
                         </div>
 
                         <div class="overview-coverage">
@@ -1493,7 +1469,8 @@
 
 <section>
                 <h2>
-                    By presidential period &#8212; current members
+                    How often do current House members cross the aisle
+                    by presidential term?
                 </h2>
 
                 <p class="section-intro">
@@ -1528,22 +1505,23 @@ ${historicalPeriodCard(
 
             <section>
                 <h2>
-                    By presidential period &#8212; members serving at the time
+                    How often did House members serving at the time
+                    cross the aisle by presidential term?
                 </h2>
 
                 <p class="section-intro">
                     These cards use all major-party members represented
                     in our data during each presidential period.
-                    The large percentage shows how often the average
-                    major-party member voted against their own party on
+                    The Republican and Democratic rows show how often
+                    the average member of each party voted against
+                    their own party on
                     <a
                         class="definition-link"
                         href="#qualifying-votes"
                     >qualifying votes</a>.
-                    The Republican and Democratic rows show the
-                    party-specific averages. Party affiliation is
-                    evaluated at the time of each vote; Independent
-                    and other non-major-party periods are excluded.
+                    Party affiliation is evaluated at the time of each
+                    vote; Independent and other non-major-party periods
+                    are excluded.
                 </p>
 
                 <div class="history-period-grid">
